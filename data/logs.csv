@@ -1,0 +1,6 @@
+id,agent_id,event_type,timestamp,details
+1,1,login,2025-11-29T20:00:00Z,Successful login
+2,2,logout,2025-11-28T18:30:00Z,User requested logout
+3,3,task_update,2025-11-29T15:45:00Z,Updated task #2 status to completed
+4,1,error,2025-11-29T20:30:00Z,API timeout
+5,4,task_create,2025-11-29T19:50:00Z,Created new task #4
