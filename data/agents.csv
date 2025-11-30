@@ -1,0 +1,6 @@
+id,agent_name,status,last_active,score
+1,AgentX,active,2025-11-29T21:00:00Z,95
+2,AgentY,inactive,2025-11-25T14:15:00Z,80
+3,AgentZ,active,2025-11-28T10:30:00Z,87
+4,AgentAlpha,active,2025-11-29T19:45:00Z,92
+5,AgentBeta,inactive,2025-11-20T08:00:00Z,76
