@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CSV API Diagnostics — Agent Endpoint Tester</title>
+<style>
+  :root{
+    --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#7c3aed; --ok:#10b981; --err:#ef4444; --glass: rgba(255,255,255,0.02);
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+  }
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,#071029 0%, #081426 60%);color:#e6eef8;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+  .wrap{max-width:1100px;margin:28px auto;padding:20px;}
+  header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+  header h1{font-size:20px;margin:0}
+  .card{background:linear-gradient(180deg,var(--card), rgba(11,18,32,0.6));border:1px solid rgba(255,255,255,0.03);padding:14px;border-radius:10px;box-shadow: 0 6px 24px rgba(2,6,23,0.6);}
+  .row{display:flex;gap:12px}
+  .col{display:flex;flex-direction:column;gap:8px}
+  input[type=text], select, textarea{background:var(--glass);border:1px solid rgba(255,255,255,0.04);color:inherit;padding:8px;border-radius:6px;font-family:inherit}
+  button{background:linear-gradient(90deg,var(--accent),#5b21b6);border:0;padding:8px 12px;border-radius:8px;color:white;cursor:pointer}
+  button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06)}
+  button.warn{background:linear-gradient(90deg,#f97316,#ef4444)}
+  .small{font-size:13px;padding:6px 8px}
+  .muted{color:var(--muted);font-size:13px}
+  .grid{display:grid;grid-template-columns:1fr 420px;gap:14px}
+  pre{background:rgba(0,0,0,0.2);padding:10px;border-radius:8px;overflow:auto;font-family:var(--mono);font-size:13px}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:6px;border-bottom:1px solid rgba(255,255,255,0.03);text-align:left;font-size:13px}
+  .pill{display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.02);font-size:12px}
+  .flex{display:flex;gap:8px;align-items:center}
+  .footer{margin-top:18px;color:var(--muted);font-size:13px}
+  .diagnostics{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .status-ok{color:var(--ok);font-weight:600}
+  .status-err{color:var(--err);font-weight:600}
+  .json-edit{width:100%;min-height:120px;resize:vertical}
+  .file-input{display:flex;gap:8px;align-items:center}
+  @media (max-width:980px){ .grid{grid-template-columns:1fr; } header{flex-direction:column;align-items:flex-start} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>CSV API Diagnostics — Agent Endpoint Tester</h1>
+      <div class="muted">Static GitHub Pages UI to interact with your Agent Data CSV API and diagnose connectivity/CORS/latency.</div>
+    </div>
+    <div style="margin-left:auto" class="muted">Status: <span id="live-status" class="pill">idle</span></div>
+  </header>
+
+  <div class="card grid">
+    <section>
+      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="col" style="flex:1">
+          <label class="muted">API Base URL</label>
+          <input id="api-base" type="text" placeholder="https://api.example.com (no trailing slash)" />
+        </div>
+        <div style="width:200px" class="col">
+          <label class="muted">Actions</label>
+          <div class="flex">
+            <button id="btn-save" class="small">Save URL</button>
+            <button id="btn-test" class="small ghost">Test</button>
+            <button id="btn-refresh" class="small ghost">Refresh datasets</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
+        <div style="flex:1">
+          <label class="muted">Datasets</label>
+          <div id="datasets-list" class="card" style="padding:8px;max-height:240px;overflow:auto"></div>
+        </div>
+
+        <div style="width:360px">
+          <label class="muted">Diagnostics</label>
+          <div class="card" style="padding:10px">
+            <div class="diagnostics">
+              <div>Connectivity: <span id="diag-conn" class="pill">—</span></div>
+              <div>Latency: <span id="diag-latency" class="pill">—</span></div>
+              <div>HTTP: <span id="diag-http" class="pill">—</span></div>
+            </div>
+            <div style="margin-top:8px" id="diag-message" class="muted">Press <strong>Test</strong> to run quick diagnostics.</div>
+            <div style="margin-top:10px"><button id="btn-diagnose" class="small">Run full diagnosis</button></div>
+          </div>
+        </div>
+      </div>
+
+      <hr style="border:none;height:12px" />
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:320px">
+          <label class="muted">Selected dataset</label>
+          <input id="selected-dataset" type="text" placeholder="Click a dataset on the left" />
+        </div>
+        <div style="width:220px">
+          <label class="muted">Query (search)</label>
+          <input id="q-search" type="text" placeholder="search text" />
+        </div>
+        <div style="width:160px">
+          <label class="muted">Limit</label>
+          <input id="q-limit" type="text" value="50" />
+        </div>
+        <div style="width:160px">
+          <label class="muted">&nbsp;</label>
+          <div class="flex">
+            <button id="btn-query" class="small">Run Query</button>
+            <button id="btn-schema" class="small ghost">Schema</button>
+            <button id="btn-export" class="small ghost">Export CSV</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="muted">Results:</div>
+        <div id="results" class="card" style="margin-top:8px;min-height:120px;padding:10px"></div>
+      </div>
+
+      <hr style="border:none;height:12px" />
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div style="flex:1">
+          <label class="muted">Create row (JSON)</label>
+          <textarea id="create-json" class="json-edit" placeholder='{"name":"Agent","role":"assistant"}'></textarea>
+          <div style="margin-top:8px" class="flex">
+            <button id="btn-create" class="small">Create</button>
+            <button id="btn-clear-create" class="small ghost">Clear</button>
+          </div>
+        </div>
+
+        <div style="width:420px">
+          <label class="muted">Update / Delete by ID</label>
+          <input id="update-id" type="text" placeholder="row id" />
+          <textarea id="update-json" class="json-edit" placeholder='{"notes":"updated"}'></textarea>
+          <div style="margin-top:8px" class="flex">
+            <button id="btn-update" class="small">Update</button>
+            <button id="btn-delete" class="small warn">Delete</button>
+          </div>
+        </div>
+      </div>
+
+      <hr style="border:none;height:12px" />
+
+      <div>
+        <label class="muted">Bulk Import (CSV)</label>
+        <div class="card" style="padding:10px">
+          <div class="file-input">
+            <input id="csv-file" type="file" accept=".csv,text/csv" />
+            <select id="import-mode">
+              <option value="append">append</option>
+              <option value="replace">replace</option>
+            </select>
+            <button id="btn-import" class="small">Import</button>
+          </div>
+          <div class="muted" style="margin-top:8px">Tip: For large files ensure your API's MAX_UPLOAD_SIZE / server limits allow the upload and that CORS allows this origin.</div>
+        </div>
+      </div>
+
+    </section>
+
+    <aside>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+        <div style="flex:1">
+          <label class="muted">Raw Request</label>
+          <pre id="raw-request" style="height:140px">—</pre>
+        </div>
+        <div style="flex:1">
+          <label class="muted">Raw Response</label>
+          <pre id="raw-response" style="height:140px">—</pre>
+        </div>
+      </div>
+
+      <div style="margin-top:8px">
+        <label class="muted">Troubleshooting & Hints</label>
+        <div class="card" style="padding:10px">
+          <div id="troubleshoot" class="muted">
+            <ul>
+              <li>Common issue: CORS blocked. Add CORS to your API server for this origin or use <code>allow_origins=["*"]</code> for testing.</li>
+              <li>Check server logs for trace IDs shown in error responses.</li>
+              <li>If fetch returns a network error (TypeError), the browser likely blocked the request due to CORS or network issues.</li>
+              <li>Use the generated curl examples below to test from the server-side (no CORS).</li>
+            </ul>
+            <div style="margin-top:8px">
+              <label class="muted">Generated curl</label>
+              <pre id="curl-example">—</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px" class="footer">
+        <div>Built for troubleshooting agent connectivity. No secrets stored; base URL saved in your browser only.</div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(() => {
+  // Elements
+  const apiBaseEl = document.getElementById('api-base');
+  const btnSave = document.getElementById('btn-save');
+  const btnTest = document.getElementById('btn-test');
+  const btnRefresh = document.getElementById('btn-refresh');
+  const datasetsList = document.getElementById('datasets-list');
+  const selectedDataset = document.getElementById('selected-dataset');
+  const btnSchema = document.getElementById('btn-schema');
+  const btnQuery = document.getElementById('btn-query');
+  const btnExport = document.getElementById('btn-export');
+  const qSearch = document.getElementById('q-search');
+  const qLimit = document.getElementById('q-limit');
+  const results = document.getElementById('results');
+  const diagConn = document.getElementById('diag-conn');
+  const diagLatency = document.getElementById('diag-latency');
+  const diagHttp = document.getElementById('diag-http');
+  const diagMessage = document.getElementById('diag-message');
+  const btnDiagnose = document.getElementById('btn-diagnose');
+  const rawReq = document.getElementById('raw-request');
+  const rawRes = document.getElementById('raw-response');
+  const curlExample = document.getElementById('curl-example');
+  const btnCreate = document.getElementById('btn-create');
+  const createJson = document.getElementById('create-json');
+  const btnUpdate = document.getElementById('btn-update');
+  const btnDelete = document.getElementById('btn-delete');
+  const updateId = document.getElementById('update-id');
+  const updateJson = document.getElementById('update-json');
+  const btnImport = document.getElementById('btn-import');
+  const csvFile = document.getElementById('csv-file');
+  const importMode = document.getElementById('import-mode');
+  const btnClearCreate = document.getElementById('btn-clear-create');
+  const liveStatus = document.getElementById('live-status');
+  const btnRefreshDatasets = document.getElementById('btn-refresh');
+
+  // State
+  let base = localStorage.getItem('csv_api_base') || '';
+  apiBaseEl.value = base;
+  updateCurlExample();
+
+  function setStatus(text, type='idle') {
+    liveStatus.textContent = text;
+    liveStatus.style.background = type === 'ok' ? 'linear-gradient(90deg,#064e3b,#10b981)' : (type==='err' ? 'linear-gradient(90deg,#4c1d95,#ef4444)' : '');
+  }
+
+  function showRaw(req, res) {
+    rawReq.textContent = JSON.stringify(req, null, 2);
+    rawRes.textContent = res ? (typeof res === 'string' ? res : JSON.stringify(res, null, 2)) : '—';
+  }
+
+  function updateCurlExample() {
+    const b = (apiBaseEl.value || localStorage.getItem('csv_api_base') || '').replace(/\/$/, '');
+    if (!b) { curlExample.textContent = 'Set API Base URL to generate curl examples.'; return; }
+    const txt = [
+      `# List datasets`,
+      `curl -i "${b}/datasets"`,
+      ``,
+      `# Query rows (search)`,
+      `curl -i "${b}/datasets/agents/rows?search=assistant&limit=10"`,
+      ``,
+      `# Create row`,
+      `curl -i -X POST "${b}/datasets/agents/rows" -H "Content-Type: application/json" -d '{"name":"AgentX","role":"assistant"}'`,
+      ``,
+      `# Import (server-side, no CORS)`,
+      `curl -i -X POST "${b}/datasets/agents/import?mode=append" -F "file=@myfile.csv"`,
+    ].join('\\n');
+    curlExample.textContent = txt;
+  }
+
+  function apiUrl(path) {
+    const b = (apiBaseEl.value || localStorage.getItem('csv_api_base') || '').replace(/\/$/, '');
+    return b ? (b + path) : null;
+  }
+
+  async function runFetch(method, path, {json=null, form=null, signal=null}={}) {
+    const url = apiUrl(path);
+    if (!url) throw new Error('API base URL not set');
+    const opts = {method, headers:{}, signal};
+    if (json) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(json); }
+    if (form) opts.body = form;
+    showRaw({method, url, body: json||'(form/file)'}, '…waiting');
+    const t0 = performance.now();
+    try {
+      const resp = await fetch(url, opts);
+      const dt = performance.now() - t0;
+      diagLatency.textContent = `${Math.round(dt)} ms`;
+      diagLatency.style.background = '';
+      diagConn.textContent = 'reachable';
+      diagConn.className = 'pill';
+      diagHttp.textContent = `${resp.status} ${resp.statusText}`;
+      diagHttp.className = resp.ok ? 'pill status-ok' : 'pill status-err';
+      let contentType = resp.headers.get('content-type') || '';
+      let payload;
+      if (contentType.includes('application/json')) {
+        payload = await resp.json();
+      } else {
+        payload = await resp.text();
+      }
+      showRaw({method, url, body: json||'(form/file)'}, {status: resp.status, headers: Object.fromEntries(resp.headers.entries()), body: payload});
+      return {ok: resp.ok, status: resp.status, payload, resp};
+    } catch (err) {
+      // network error / CORS blocked leads here (TypeError)
+      const dt = performance.now() - t0;
+      diagLatency.textContent = `${Math.round(dt)} ms`;
+      diagConn.textContent = 'unreachable';
+      diagConn.className = 'pill status-err';
+      diagHttp.textContent = 'network error';
+      diagMessage.textContent = 'Network error — likely CORS blocked or network unreachable. Check Console for details and verify server allows cross-origin from this origin.';
+      showRaw({method, url, body: json||'(form/file)'}, String(err));
+      throw err;
+    }
+  }
+
+  async function listDatasets() {
+    try {
+      const res = await runFetch('GET', '/datasets');
+      if (res.ok) {
+        renderDatasets(res.payload);
+        setStatus('datasets loaded','ok');
+      } else {
+        setStatus('error','err');
+      }
+    } catch (e) {
+      setStatus('error','err');
+      console.error(e);
+    }
+  }
+
+  function renderDatasets(arr) {
+    datasetsList.innerHTML = '';
+    if (!Array.isArray(arr) || arr.length===0) {
+      datasetsList.innerHTML = '<div class="muted">No datasets found</div>';
+      return;
+    }
+    arr.forEach(fn=>{
+      const name = fn.replace(/\\.csv$/i,'');
+      const el = document.createElement('div');
+      el.style.display='flex';
+      el.style.justifyContent='space-between';
+      el.style.alignItems='center';
+      el.style.padding='6px';
+      el.style.borderBottom='1px solid rgba(255,255,255,0.02)';
+      el.innerHTML = `<div style="font-size:14px">${name}</div>`;
+      const actions = document.createElement('div');
+      actions.style.display='flex';
+      actions.style.gap='6px';
+      const btnSel = document.createElement('button'); btnSel.textContent='Select'; btnSel.className='small ghost';
+      btnSel.onclick = ()=>{ selectedDataset.value = name; setStatus('selected',''); updateCurlExample(); };
+      const btnView = document.createElement('button'); btnView.textContent='View'; btnView.className='small';
+      btnView.onclick = ()=>{ selectedDataset.value = name; queryRows(); };
+      actions.appendChild(btnSel); actions.appendChild(btnView);
+      el.appendChild(actions);
+      datasetsList.appendChild(el);
+    });
+  }
+
+  async function queryRows() {
+    const name = selectedDataset.value.trim();
+    if (!name) { alert('Select a dataset'); return; }
+    const params = new URLSearchParams();
+    if (qSearch.value) params.set('search', qSearch.value);
+    if (qLimit.value) params.set('limit', qLimit.value);
+    const path = `/datasets/${encodeURIComponent(name)}/rows?${params.toString()}`;
+    try {
+      const res = await runFetch('GET', path);
+      if (res.ok) {
+        renderResults(res.payload);
+      } else {
+        results.innerHTML = `<div class="muted">Error: ${res.status}</div>`;
+      }
+    } catch (e) {
+      console.error(e);
+      results.innerHTML = `<div class="muted">Network / CORS error. Open browser console for details.</div>`;
+    }
+    updateCurlExample();
+  }
+
+  function renderResults(payload) {
+    results.innerHTML = '';
+    if (!payload || !Array.isArray(payload.rows)) { results.textContent = 'No results'; return; }
+    const total = document.createElement('div'); total.textContent = `Total: ${payload.total}`;
+    total.className='muted';
+    results.appendChild(total);
+    const table = document.createElement('table');
+    const rows = payload.rows;
+    if (rows.length === 0) {
+      const e = document.createElement('div'); e.className='muted'; e.textContent = 'No rows';
+      results.appendChild(e);
+      return;
+    }
+    const headers = Object.keys(rows[0]);
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>';
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    rows.forEach(r=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = headers.map(h=>`<td>${escapeHtml(String(r[h] ?? ''))}</td>`).join('');
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    results.appendChild(table);
+  }
+
+  // CRUD handlers
+  async function createRow() {
+    const name = selectedDataset.value.trim();
+    if (!name) { alert('Select a dataset'); return; }
+    let body;
+    try { body = JSON.parse(createJson.value); } catch (e) { alert('Invalid JSON'); return; }
+    try {
+      const res = await runFetch('POST', `/datasets/${encodeURIComponent(name)}/rows`, {json: body});
+      if (res.ok) { alert('Created. ID: ' + (res.payload.id || '(unknown)')); queryRows(); } else { alert('Create failed: ' + JSON.stringify(res.payload)); }
+    } catch (e) { console.error(e); }
+  }
+
+  async function updateRow() {
+    const name = selectedDataset.value.trim();
+    const id = updateId.value.trim();
+    if (!name || !id) { alert('Select dataset and enter id'); return; }
+    let body;
+    try { body = JSON.parse(updateJson.value); } catch (e) { alert('Invalid JSON'); return; }
+    try {
+      const res = await runFetch('PUT', `/datasets/${encodeURIComponent(name)}/rows/${encodeURIComponent(id)}`, {json: body});
+      if (res.ok) { alert('Updated'); queryRows(); } else { alert('Update failed: ' + JSON.stringify(res.payload)); }
+    } catch (e) { console.error(e); }
+  }
+
+  async function deleteRow() {
+    const name = selectedDataset.value.trim();
+    const id = updateId.value.trim();
+    if (!name || !id) { alert('Select dataset and enter id'); return; }
+    if (!confirm('Delete row ' + id + ' from ' + name + '?')) return;
+    try {
+      const res = await runFetch('DELETE', `/datasets/${encodeURIComponent(name)}/rows/${encodeURIComponent(id)}`);
+      if (res.ok || res.status===204) { alert('Deleted'); queryRows(); } else { alert('Delete failed'); }
+    } catch (e) { console.error(e); }
+  }
+
+  async function showSchema() {
+    const name = selectedDataset.value.trim();
+    if (!name) { alert('Select dataset'); return; }
+    try {
+      const res = await runFetch('GET', `/datasets/${encodeURIComponent(name)}/schema`);
+      if (res.ok) {
+        results.innerHTML = '<div class="muted">Schema:</div><pre>' + JSON.stringify(res.payload, null, 2) + '</pre>';
+      } else {
+        results.innerHTML = '<div class="muted">Error retrieving schema</div>';
+      }
+    } catch (e) { console.error(e); }
+  }
+
+  async function exportCsv() {
+    const name = selectedDataset.value.trim();
+    if (!name) { alert('Select dataset'); return; }
+    const url = apiUrl(`/datasets/${encodeURIComponent(name)}/export`);
+    if (!url) { alert('Set API base URL'); return; }
+    // open in new tab to trigger download; note CORS must allow this
+    window.open(url, '_blank');
+  }
+
+  async function importCsv() {
+    const name = selectedDataset.value.trim();
+    if (!name) { alert('Select dataset'); return; }
+    const file = csvFile.files[0];
+    if (!file) { alert('Choose a CSV file'); return; }
+    const mode = importMode.value;
+    const form = new FormData();
+    form.append('file', file, file.name);
+    const path = `/datasets/${encodeURIComponent(name)}/import?mode=${encodeURIComponent(mode)}`;
+    try {
+      const res = await runFetch('POST', path, {form});
+      if (res.ok) {
+        alert('Import result: ' + JSON.stringify(res.payload));
+        queryRows();
+      } else {
+        alert('Import failed: ' + JSON.stringify(res.payload));
+      }
+    } catch (e) { console.error(e); alert('Import error: check console for details'); }
+  }
+
+  async function quickTest() {
+    setStatus('testing...');
+    diagMessage.textContent = 'Running quick test: GET /datasets';
+    try {
+      const t0 = performance.now();
+      const res = await runFetch('GET', '/datasets');
+      const dt = performance.now() - t0;
+      if (res.ok) {
+        diagMessage.textContent = `OK — ${res.payload.length || 0} dataset(s). Latency ~${Math.round(dt)}ms.`;
+        setStatus('ok','ok');
+      } else {
+        diagMessage.textContent = `Server returned ${res.status}. See response for details.`;
+        setStatus('error','err');
+      }
+    } catch (err) {
+      diagMessage.textContent = 'Network/CORS error. Check server CORS and console.';
+      setStatus('error','err');
+    }
+  }
+
+  async function fullDiagnose() {
+    setStatus('diagnosing...');
+    diagMessage.textContent = 'Running full diagnostics: /datasets, /openapi.json (if present), sample POST (dry-run)...';
+    diagConn.textContent = 'testing...';
+    diagLatency.textContent = '…';
+    try {
+      const ds = await runFetch('GET', '/datasets');
+      if (!ds.ok) { diagMessage.textContent = 'Error fetching /datasets: ' + JSON.stringify(ds.payload); setStatus('error','err'); return; }
+      // try openapi
+      let openapiOk = false;
+      try {
+        const op = await runFetch('GET', '/openapi.json');
+        openapiOk = op.ok;
+      } catch(e){}
+      diagMessage.textContent = `datasets OK (${(ds.payload||[]).length} items). openapi.json ${openapiOk ? 'found' : 'not found'}.`;
+      setStatus('ok','ok');
+    } catch (e) {
+      diagMessage.textContent = 'Full diagnosis failed: network/CORS or server unreachable.';
+      setStatus('error','err');
+    }
+  }
+
+  // Utilities
+  function escapeHtml(s){ return s.replace(/[&<>"'`]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;', '`':'&#96;' }[c])); }
+
+  // Event wiring
+  btnSave.onclick = ()=>{ localStorage.setItem('csv_api_base', apiBaseEl.value.trim()); updateCurlExample(); alert('Saved'); };
+  btnTest.onclick = quickTest;
+  btnDiagnose.onclick = fullDiagnose;
+  btnRefreshDatasets.onclick = listDatasets;
+  btnSchema.onclick = showSchema;
+  btnQuery.onclick = queryRows;
+  btnExport.onclick = exportCsv;
+  btnCreate.onclick = createRow;
+  btnUpdate.onclick = updateRow;
+  btnDelete.onclick = deleteRow;
+  btnImport.onclick = importCsv;
+  btnClearCreate.onclick = ()=>{ createJson.value=''; };
+
+  // auto-load datasets if base present
+  window.addEventListener('load', ()=>{ if (apiBaseEl.value) listDatasets(); });
+
+  // small UX: allow Enter in selected-dataset to query
+  selectedDataset.addEventListener('keypress', (e)=>{ if (e.key === 'Enter') queryRows(); });
+
+})();
+</script>
+</body>
+</html>
