@@ -1,0 +1,7 @@
+[
+  {"id": 1, "agent_name": "AgentX", "status": "active", "last_active": "2025-11-29T21:00:00Z", "score": 95},
+  {"id": 2, "agent_name": "AgentY", "status": "inactive", "last_active": "2025-11-25T14:15:00Z", "score": 80},
+  {"id": 3, "agent_name": "AgentZ", "status": "active", "last_active": "2025-11-28T10:30:00Z", "score": 87},
+  {"id": 4, "agent_name": "AgentAlpha", "status": "active", "last_active": "2025-11-29T19:45:00Z", "score": 92},
+  {"id": 5, "agent_name": "AgentBeta", "status": "inactive", "last_active": "2025-11-20T08:00:00Z", "score": 76}
+]
