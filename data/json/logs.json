@@ -1,0 +1,7 @@
+[
+  {"id": 1, "agent_id": 1, "event_type": "login", "timestamp": "2025-11-29T20:00:00Z", "details": "Successful login"},
+  {"id": 2, "agent_id": 2, "event_type": "logout", "timestamp": "2025-11-28T18:30:00Z", "details": "User requested logout"},
+  {"id": 3, "agent_id": 3, "event_type": "task_update", "timestamp": "2025-11-29T15:45:00Z", "details": "Updated task #2 status to completed"},
+  {"id": 4, "agent_id": 1, "event_type": "error", "timestamp": "2025-11-29T20:30:00Z", "details": "API timeout"},
+  {"id": 5, "agent_id": 4, "event_type": "task_create", "timestamp": "2025-11-29T19:50:00Z", "details": "Created new task #4"}
+]

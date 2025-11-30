@@ -1,0 +1,7 @@
+[
+  {"id": 1, "name": "Lucius Morningstar", "email": "lucius@example.com", "role": "admin", "active": true},
+  {"id": 2, "name": "Jane Doe", "email": "jane.doe@example.com", "role": "agent", "active": true},
+  {"id": 3, "name": "John Smith", "email": "john.smith@example.com", "role": "agent", "active": false},
+  {"id": 4, "name": "Mary Johnson", "email": "mary.j@example.com", "role": "agent", "active": true},
+  {"id": 5, "name": "Alan Turing", "email": "alan.t@example.com", "role": "admin", "active": true}
+]
