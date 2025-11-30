@@ -1,0 +1,6 @@
+id,name,email,role,active
+1,Lucius Morningstar,lucius@example.com,admin,true
+2,Jane Doe,jane.doe@example.com,agent,true
+3,John Smith,john.smith@example.com,agent,false
+4,Mary Johnson,mary.j@example.com,agent,true
+5,Alan Turing,alan.t@example.com,admin,true
