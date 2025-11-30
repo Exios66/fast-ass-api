@@ -1,0 +1,6 @@
+id,user_id,task_name,status,priority,due_date
+1,2,Collect data,open,high,2025-12-05
+2,3,Analyze metrics,completed,medium,2025-11-29
+3,4,Generate report,open,low,2025-12-10
+4,2,Validate CSVs,in_progress,high,2025-12-01
+5,5,Update API docs,completed,medium,2025-11-28
