@@ -1,0 +1,210 @@
+openapi: 3.1.0
+info:
+  title: Agent Data CSV API
+  version: 1.1.0
+servers:
+  - url: http://localhost:8000
+paths:
+  /datasets:
+    get:
+      summary: List available CSV datasets (filenames)
+      responses:
+        '200':
+          description: Array of dataset filenames
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /datasets/{name}/schema:
+    get:
+      summary: Get CSV column names for dataset
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Schema for dataset
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  columns:
+                    type: array
+                    items:
+                      type: string
+
+  /datasets/{name}/rows:
+    get:
+      summary: Query rows from a dataset
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search text matched across all fields (case-insensitive)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        '200':
+          description: Array of CSV rows
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  rows:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+
+    post:
+      summary: Create a row in the dataset
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: Created row
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+  /datasets/{name}/rows/{id}:
+    put:
+      summary: Update a row by id
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Updated row
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+    delete:
+      summary: Delete a row by id
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted
+
+  /datasets/{name}/import:
+    post:
+      summary: Bulk import CSV into dataset
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: mode
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [append, replace]
+            default: append
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Import result
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /datasets/{name}/export:
+    get:
+      summary: Export dataset CSV file
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: CSV file
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
