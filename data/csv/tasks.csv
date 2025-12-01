@@ -1,6 +1,16 @@
-id,user_id,task_name,status,priority,due_date
-1,2,Collect data,open,high,2025-12-05
-2,3,Analyze metrics,completed,medium,2025-11-29
-3,4,Generate report,open,low,2025-12-10
-4,2,Validate CSVs,in_progress,high,2025-12-01
-5,5,Update API docs,completed,medium,2025-11-28
+id,user_id,task_name,status,priority,due_date,assignee,tags,dependencies,estimated_time,actual_time,attachments
+1,2,Collect data,open,high,2025-12-05,jane.doe@example.com,"[""data"",""collection""]","[]",8,0,"[""data-spec.pdf""]"
+2,3,Analyze metrics,completed,medium,2025-11-29,john.smith@example.com,"[""analysis"",""metrics""]","[]",12,11,"[""metrics-report.xlsx""]"
+3,4,Generate report,open,low,2025-12-10,mary.j@example.com,"[""report"",""documentation""]","[2]",6,0,"[]"
+4,2,Validate CSVs,in_progress,high,2025-12-01,jane.doe@example.com,"[""validation"",""data""]","[]",4,2,"[""validation-script.py""]"
+5,5,Update API docs,completed,medium,2025-11-28,alan.t@example.com,"[""documentation"",""api""]","[]",10,9,"[""api-docs.md"",""openapi.yaml""]"
+6,6,Design dashboard,open,high,2025-12-08,sarah.c@example.com,"[""design"",""ui""]","[]",16,0,"[""mockup.fig""]"
+7,7,Implement authentication,in_progress,high,2025-12-03,david.l@example.com,"[""security"",""auth""]","[]",20,12,"[""auth-spec.md""]"
+8,8,Write unit tests,open,medium,2025-12-12,emily.c@example.com,"[""testing"",""qa""]","[7]",14,0,"[""test-plan.md""]"
+9,9,Deploy to production,open,high,2025-12-15,michael.b@example.com,"[""deployment"",""ops""]","[7,8]",8,0,"[""deploy-config.yaml""]"
+10,10,Performance optimization,open,medium,2025-12-20,lisa.w@example.com,"[""performance"",""optimization""]","[]",24,0,"[""profiling-results.txt""]"
+11,1,Review code changes,open,low,2025-12-06,lucius@example.com,"[""review"",""code""]","[7]",4,0,"[]"
+12,3,Setup monitoring,completed,medium,2025-11-27,john.smith@example.com,"[""monitoring"",""ops""]","[]",6,5,"[""monitoring-config.json""]"
+13,4,Create user guide,open,low,2025-12-18,mary.j@example.com,"[""documentation"",""user""]","[3]",10,0,"[""user-guide-template.md""]"
+14,5,Database migration,in_progress,high,2025-12-02,alan.t@example.com,"[""database"",""migration""]","[]",18,10,"[""migration-script.sql""]"
+15,6,API rate limiting,completed,low,2025-11-26,sarah.c@example.com,"[""api"",""security""]","[]",8,7,"[""rate-limit-config.yaml""]"

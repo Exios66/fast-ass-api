@@ -1,0 +1,22 @@
+id,conversation_id,user_id,agent_id,message,role,timestamp,metadata,response_time,model_used
+1,conv-001,2,1,Hello, I need help with the API,user,2025-11-29T20:00:00Z,"{""platform"":""web"",""session_id"":""sess-123""}",0,gpt-4
+2,conv-001,2,1,How can I help you with the API today?,assistant,2025-11-29T20:00:05Z,"{""platform"":""web"",""session_id"":""sess-123""}",450,gpt-4
+3,conv-001,2,1,How do I filter by date?,user,2025-11-29T20:00:30Z,"{""platform"":""web"",""session_id"":""sess-123""}",0,gpt-4
+4,conv-001,2,1,You can use the date_after or date_before operators in advanced filters. For example: field=created_at&operator=date_after&value=2025-11-01,assistant,2025-11-29T20:00:35Z,"{""platform"":""web"",""session_id"":""sess-123""}",380,gpt-4
+5,conv-002,3,3,What endpoints are available?,user,2025-11-29T18:15:00Z,"{""platform"":""mobile"",""session_id"":""sess-456""}",0,claude-3
+6,conv-002,3,3,The API provides endpoints for datasets, rows, bulk operations, metadata, and export. Check /docs for full documentation.,assistant,2025-11-29T18:15:05Z,"{""platform"":""mobile"",""session_id"":""sess-456""}",520,claude-3
+7,conv-003,4,4,How do I export data as JSON?,user,2025-11-29T19:30:00Z,"{""platform"":""web"",""session_id"":""sess-789""}",0,gpt-4-turbo
+8,conv-003,4,4,Use GET /datasets/{name}/export?format=json to export as JSON. You can also use the export endpoint in the UI.,assistant,2025-11-29T19:30:06Z,"{""platform"":""web"",""session_id"":""sess-789""}",420,gpt-4-turbo
+9,conv-004,5,2,I'm getting a CORS error,user,2025-11-29T17:45:00Z,"{""platform"":""web"",""session_id"":""sess-012""}",0,gpt-3.5
+10,conv-004,5,2,CORS errors occur when the API server doesn't allow requests from your origin. Make sure CORS is enabled on the server with your origin in the allowed list.,assistant,2025-11-29T17:45:08Z,"{""platform"":""web"",""session_id"":""sess-012""}",680,gpt-3.5
+11,conv-005,6,6,Can I use regex in filters?,user,2025-11-29T16:20:00Z,"{""platform"":""web"",""session_id"":""sess-345""}",0,claude-3-opus
+12,conv-005,6,6,Yes! Use the regex operator in advanced filters. For example: field=email&operator=regex&value=.*@example\.com,assistant,2025-11-29T16:20:07Z,"{""platform"":""web"",""session_id"":""sess-345""}",550,claude-3-opus
+13,conv-006,7,7,How do I bulk update rows?,user,2025-11-29T15:10:00Z,"{""platform"":""mobile"",""session_id"":""sess-678""}",0,gpt-4-vision
+14,conv-006,7,7,Use PUT /datasets/{name}/rows/bulk with a JSON body containing an updates array. Each update object needs an id field.,assistant,2025-11-29T15:10:12Z,"{""platform"":""mobile"",""session_id"":""sess-678""}",720,gpt-4-vision
+15,conv-007,8,9,What's the rate limit?,user,2025-11-29T14:00:00Z,"{""platform"":""web"",""session_id"":""sess-901""}",0,gpt-4-turbo
+16,conv-007,8,9,Rate limits vary by endpoint. Most endpoints allow 100-200 requests per minute. Check the X-RateLimit headers in responses.,assistant,2025-11-29T14:00:08Z,"{""platform"":""web"",""session_id"":""sess-901""}",480,gpt-4-turbo
+17,conv-008,9,1,How do I get dataset metadata?,user,2025-11-29T13:30:00Z,"{""platform"":""web"",""session_id"":""sess-234""}",0,gpt-4
+18,conv-008,9,1,Use GET /datasets/{name}/metadata to retrieve metadata. Use PUT /datasets/{name}/metadata to update it.,assistant,2025-11-29T13:30:06Z,"{""platform"":""web"",""session_id"":""sess-234""}",390,gpt-4
+19,conv-009,10,5,Can I import CSV files?,user,2025-11-29T12:15:00Z,"{""platform"":""web"",""session_id"":""sess-567""}",0,gpt-3.5
+20,conv-009,10,5,Yes! Use POST /datasets/{name}/import with a CSV file. Set mode=append to add rows or mode=replace to overwrite.,assistant,2025-11-29T12:15:10Z,"{""platform"":""web"",""session_id"":""sess-567""}",650,gpt-3.5
+

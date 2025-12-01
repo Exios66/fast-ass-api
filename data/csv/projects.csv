@@ -1,0 +1,12 @@
+id,project_name,description,status,owner,start_date,end_date,budget,spent,team_size,technologies,tags
+1,API Enhancement,Enhance CSV API with advanced features,in_progress,lucius@example.com,2025-10-01,2025-12-31,50000,32500,5,"[""FastAPI"",""Python"",""Docker""]","[""api"",""backend""]"
+2,Frontend Redesign,Redesign user interface with modern UI,in_progress,sarah.c@example.com,2025-11-01,2026-01-15,75000,28000,4,"[""React"",""TypeScript"",""Tailwind""]","[""frontend"",""ui""]"
+3,Database Migration,Migrate to new database system,planning,alan.t@example.com,2025-12-01,2026-02-28,100000,0,3,"[""PostgreSQL"",""Python"",""SQLAlchemy""]","[""database"",""migration""]"
+4,Mobile App Development,Develop mobile application for iOS and Android,planning,david.l@example.com,2026-01-01,2026-06-30,150000,0,6,"[""React Native"",""TypeScript"",""Firebase""]","[""mobile"",""app""]"
+5,Analytics Dashboard,Build analytics dashboard for metrics,completed,mary.j@example.com,2025-09-01,2025-11-15,40000,38500,3,"[""React"",""D3.js"",""Python""]","[""analytics"",""dashboard""]"
+6,Security Audit,Conduct security audit and fix vulnerabilities,in_progress,michael.b@example.com,2025-11-15,2025-12-20,60000,42000,2,"[""Security"",""Python"",""OWASP""]","[""security"",""audit""]"
+7,Documentation Site,Create comprehensive documentation site,completed,lisa.w@example.com,2025-08-01,2025-10-30,30000,28500,2,"[""Vue.js"",""Markdown"",""VitePress""]","[""documentation"",""site""]"
+8,CI/CD Pipeline,Setup continuous integration and deployment,in_progress,jane.doe@example.com,2025-10-15,2025-12-10,25000,18000,2,"[""GitHub Actions"",""Docker"",""Kubernetes""]","[""ci"",""cd"",""devops""]"
+9,Performance Optimization,Optimize application performance,planning,emily.c@example.com,2026-01-15,2026-03-31,50000,0,3,"[""Python"",""Profiling"",""Caching""]","[""performance"",""optimization""]"
+10,Testing Framework,Implement comprehensive testing framework,completed,john.smith@example.com,2025-07-01,2025-09-30,35000,33200,3,"[""pytest"",""Jest"",""Cypress""]","[""testing"",""qa""]"
+

@@ -1,6 +1,21 @@
-id,agent_id,event_type,timestamp,details
-1,1,login,2025-11-29T20:00:00Z,Successful login
-2,2,logout,2025-11-28T18:30:00Z,User requested logout
-3,3,task_update,2025-11-29T15:45:00Z,Updated task #2 status to completed
-4,1,error,2025-11-29T20:30:00Z,API timeout
-5,4,task_create,2025-11-29T19:50:00Z,Created new task #4
+id,agent_id,event_type,timestamp,details,severity,source_ip,user_agent,response_time,error_code
+1,1,login,2025-11-29T20:00:00Z,Successful login,info,192.168.1.100,Mozilla/5.0 (Windows NT 10.0; Win64; x64),45,
+2,2,logout,2025-11-28T18:30:00Z,User requested logout,info,192.168.1.101,Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7),32,
+3,3,task_update,2025-11-29T15:45:00Z,Updated task #2 status to completed,info,192.168.1.102,Mozilla/5.0 (X11; Linux x86_64),78,
+4,1,error,2025-11-29T20:30:00Z,API timeout,error,192.168.1.100,Mozilla/5.0 (Windows NT 10.0; Win64; x64),5000,TIMEOUT
+5,4,task_create,2025-11-29T19:50:00Z,Created new task #4,info,192.168.1.103,Mozilla/5.0 (iPhone; CPU iPhone OS 14_0),56,
+6,5,api_request,2025-11-29T21:15:00Z,GET /datasets/users/rows,info,10.0.0.5,curl/7.68.0,120,
+7,6,error,2025-11-29T18:20:00Z,Database connection failed,error,192.168.1.104,Mozilla/5.0 (Windows NT 10.0; Win64; x64),2000,DB_ERROR
+8,7,login,2025-11-29T17:45:00Z,Successful login,info,192.168.1.105,Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7),38,
+9,8,api_request,2025-11-29T16:30:00Z,POST /datasets/tasks/rows,info,10.0.0.6,PostmanRuntime/7.28.0,95,
+10,9,error,2025-11-29T15:10:00Z,Invalid JSON payload,warning,192.168.1.106,Mozilla/5.0 (X11; Linux x86_64),25,VALIDATION_ERROR
+11,10,logout,2025-11-29T14:20:00Z,User requested logout,info,192.168.1.107,Mozilla/5.0 (iPhone; CPU iPhone OS 14_0),28,
+12,1,api_request,2025-11-29T13:45:00Z,GET /datasets/agents/rows?search=active,info,10.0.0.7,curl/7.68.0,67,
+13,2,error,2025-11-29T12:30:00Z,Rate limit exceeded,warning,192.168.1.108,Mozilla/5.0 (Windows NT 10.0; Win64; x64),15,RATE_LIMIT
+14,3,task_update,2025-11-29T11:15:00Z,Updated task #7 priority to high,info,192.168.1.109,Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7),82,
+15,4,api_request,2025-11-29T10:00:00Z,DELETE /datasets/logs/rows/123,info,10.0.0.8,PostmanRuntime/7.28.0,45,
+16,5,login,2025-11-29T09:30:00Z,Successful login,info,192.168.1.110,Mozilla/5.0 (X11; Linux x86_64),42,
+17,6,error,2025-11-29T08:45:00Z,File not found,error,192.168.1.111,Mozilla/5.0 (Windows NT 10.0; Win64; x64),180,NOT_FOUND
+18,7,api_request,2025-11-29T07:20:00Z,PUT /datasets/users/rows/5,info,10.0.0.9,curl/7.68.0,88,
+19,8,task_create,2025-11-29T06:10:00Z,Created new task #15,info,192.168.1.112,Mozilla/5.0 (iPhone; CPU iPhone OS 14_0),51,
+20,9,logout,2025-11-29T05:30:00Z,User requested logout,info,192.168.1.113,Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7),35,
