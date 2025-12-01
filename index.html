@@ -437,20 +437,348 @@
   .preset-item:hover {
     background: var(--hover);
   }
+
+  /* Sidebar Navigation */
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 280px;
+    height: 100vh;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    padding: 20px;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-toggle {
+    position: fixed;
+    left: 20px;
+    top: 20px;
+    z-index: 1001;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .sidebar-section {
+    margin-bottom: 24px;
+  }
+
+  .sidebar-section h3 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin: 0 0 8px 0;
+  }
+
+  .sidebar-link {
+    display: block;
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: all 0.2s;
+    margin-bottom: 4px;
+    font-size: 14px;
+  }
+
+  .sidebar-link:hover {
+    background: var(--hover);
+    color: var(--accent);
+  }
+
+  .sidebar-link.active {
+    background: var(--accent);
+    color: white;
+  }
+
+  /* Breadcrumbs */
+  .breadcrumbs {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 13px;
+  }
+
+  .breadcrumb-item {
+    color: var(--muted);
+  }
+
+  .breadcrumb-item.active {
+    color: var(--accent);
+  }
+
+  .breadcrumb-separator {
+    color: var(--muted);
+  }
+
+  /* System Status */
+  .system-status {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--glass);
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .status-badge.healthy {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--ok);
+  }
+
+  .status-badge.unhealthy {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--err);
+  }
+
+  /* Schema Viewer */
+  .schema-viewer {
+    margin-top: 16px;
+  }
+
+  .schema-column {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .schema-column-name {
+    font-weight: 500;
+    font-family: var(--mono);
+  }
+
+  .schema-column-type {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  /* Metadata Manager */
+  .metadata-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Loading Skeleton */
+  .skeleton {
+    background: linear-gradient(90deg, var(--glass) 25%, var(--hover) 50%, var(--glass) 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s ease-in-out infinite;
+    border-radius: 4px;
+  }
+
+  @keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Progress Bar */
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--glass);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #5b21b6);
+    transition: width 0.3s ease;
+  }
+
+  /* Badge */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--glass);
+  }
+
+  /* Endpoint Explorer */
+  .endpoint-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .endpoint-header {
+    padding: 12px;
+    background: var(--glass);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .endpoint-header:hover {
+    background: var(--hover);
+  }
+
+  .endpoint-method {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 8px;
+  }
+
+  .endpoint-method.get { background: rgba(16, 185, 129, 0.2); color: var(--ok); }
+  .endpoint-method.post { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+  .endpoint-method.put { background: rgba(245, 158, 11, 0.2); color: var(--warn); }
+  .endpoint-method.delete { background: rgba(239, 68, 68, 0.2); color: var(--err); }
+
+  .endpoint-content {
+    padding: 12px;
+    display: none;
+  }
+
+  .endpoint-item.expanded .endpoint-content {
+    display: block;
+  }
+
+  /* Accessibility */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 768px) {
+    .sidebar {
+      width: 100%;
+    }
+
+    .wrap {
+      margin-left: 0;
+    }
+
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* High contrast mode */
+  @media (prefers-contrast: high) {
+    :root {
+      --border: rgba(255,255,255,0.2);
+      --hover: rgba(255,255,255,0.1);
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 </style>
 </head>
 <body data-theme="dark">
-<div class="wrap">
+  <!-- Sidebar Navigation -->
+  <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
+  <nav class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+    <div class="sidebar-section">
+      <h3>Quick Access</h3>
+      <a href="#" class="sidebar-link" data-tab="query">Query & Browse</a>
+      <a href="#" class="sidebar-link" data-tab="crud">CRUD Operations</a>
+      <a href="#" class="sidebar-link" data-tab="bulk">Bulk Operations</a>
+      <a href="#" class="sidebar-link" data-tab="export">Export & Import</a>
+      <a href="#" class="sidebar-link" data-tab="metadata">Metadata</a>
+      <a href="#" class="sidebar-link" data-tab="tokenizer">LLM Tokenizer</a>
+      <a href="#" class="sidebar-link" data-tab="docs">API Docs</a>
+      <a href="#" class="sidebar-link" data-tab="history">History</a>
+    </div>
+    <div class="sidebar-section">
+      <h3>Health & Status</h3>
+      <a href="#" class="sidebar-link" data-action="health">Health Check</a>
+      <a href="#" class="sidebar-link" data-action="ready">Readiness</a>
+      <a href="#" class="sidebar-link" data-action="metrics">Metrics</a>
+    </div>
+    <div class="sidebar-section">
+      <h3>Endpoints</h3>
+      <a href="#" class="sidebar-link" data-endpoint="datasets">List Datasets</a>
+      <a href="#" class="sidebar-link" data-endpoint="schema">Get Schema</a>
+      <a href="#" class="sidebar-link" data-endpoint="rows">Query Rows</a>
+      <a href="#" class="sidebar-link" data-endpoint="create">Create Row</a>
+      <a href="#" class="sidebar-link" data-endpoint="update">Update Row</a>
+      <a href="#" class="sidebar-link" data-endpoint="delete">Delete Row</a>
+    </div>
+  </nav>
+
+<div class="wrap" id="main-content">
   <header>
     <div>
       <h1>📊 CSV API Diagnostics — Enhanced Agent Endpoint Tester</h1>
       <div class="muted">Comprehensive UI to interact with your Agent Data CSV API with advanced features</div>
     </div>
     <div class="flex">
-      <button class="theme-toggle small" id="theme-toggle" title="Toggle theme">🌓</button>
+      <button class="theme-toggle small" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">🌓</button>
       <div class="muted">Status: <span id="live-status" class="pill">idle</span></div>
     </div>
   </header>
+
+  <!-- System Status Bar -->
+  <div class="system-status" id="system-status" role="status" aria-live="polite">
+    <div class="status-badge" id="health-badge">
+      <span class="connection-indicator" id="health-indicator"></span>
+      <span id="health-text">Checking...</span>
+    </div>
+    <div class="muted" id="health-details">System status will appear here</div>
+  </div>
+
+  <!-- Breadcrumbs -->
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <span class="breadcrumb-item active">Home</span>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-item" id="breadcrumb-current">Dashboard</span>
+  </nav>
 
   <div class="toast-container" id="toast-container"></div>
 
@@ -475,7 +803,10 @@
         
         <div class="row" style="margin-top: 12px;">
           <div style="flex: 1;">
-            <label class="muted">Datasets</label>
+            <div class="flex" style="justify-content: space-between; margin-bottom: 8px;">
+              <label class="muted">Datasets</label>
+              <button id="btn-refresh-datasets" class="small ghost" title="Refresh datasets list">↻</button>
+            </div>
             <div id="datasets-list" class="card" style="padding: 8px; max-height: 200px; overflow: auto;"></div>
           </div>
           
@@ -490,7 +821,8 @@
               <div id="diag-message" class="muted" style="margin-bottom: 8px;">Press <strong>Test</strong> to run diagnostics.</div>
               <div class="flex">
                 <button id="btn-diagnose" class="small">Full Diagnosis</button>
-                <button id="btn-health" class="small ghost">Health Check</button>
+                <button id="btn-health" class="small ghost">Health</button>
+                <button id="btn-ready" class="small ghost">Ready</button>
                 <button id="btn-metrics" class="small ghost">Metrics</button>
               </div>
             </div>
@@ -499,14 +831,15 @@
       </div>
 
       <!-- Tabs for different sections -->
-      <div class="tabs">
-        <button class="tab active" data-tab="query">Query & Browse</button>
-        <button class="tab" data-tab="crud">CRUD Operations</button>
-        <button class="tab" data-tab="bulk">Bulk Operations</button>
-        <button class="tab" data-tab="export">Export & Import</button>
-        <button class="tab" data-tab="tokenizer">LLM Tokenizer</button>
-        <button class="tab" data-tab="docs">API Docs</button>
-        <button class="tab" data-tab="history">History</button>
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="query" role="tab" aria-selected="true">Query & Browse</button>
+        <button class="tab" data-tab="crud" role="tab" aria-selected="false">CRUD Operations</button>
+        <button class="tab" data-tab="bulk" role="tab" aria-selected="false">Bulk Operations</button>
+        <button class="tab" data-tab="export" role="tab" aria-selected="false">Export & Import</button>
+        <button class="tab" data-tab="metadata" role="tab" aria-selected="false">Metadata</button>
+        <button class="tab" data-tab="tokenizer" role="tab" aria-selected="false">LLM Tokenizer</button>
+        <button class="tab" data-tab="docs" role="tab" aria-selected="false">API Docs</button>
+        <button class="tab" data-tab="history" role="tab" aria-selected="false">History</button>
       </div>
 
       <!-- Query Tab -->
@@ -518,16 +851,33 @@
               <input id="selected-dataset" type="text" placeholder="Click a dataset or type name" />
             </div>
             <div style="width: 200px;">
-              <label class="muted">Limit</label>
-              <input id="q-limit" type="number" value="50" min="1" max="10000" />
+              <label class="muted" for="q-limit">Limit</label>
+              <input 
+                id="q-limit"
+                type="number"
+                value="50"
+                min="1"
+                max="10000"
+                placeholder="Limit (max rows)"
+                title="Limit: Maximum number of rows to return"
+                aria-label="Limit"
+              />
             </div>
             <div style="width: 200px;">
-              <label class="muted">Offset</label>
-              <input id="q-offset" type="number" value="0" min="0" />
+              <label class="muted" for="q-offset">Offset</label>
+              <input 
+                id="q-offset"
+                type="number"
+                value="0"
+                min="0"
+                placeholder="Offset (start row)"
+                title="Offset: How many rows to skip"
+                aria-label="Offset"
+              />
             </div>
             <div style="width: 150px;">
-              <label class="muted">&nbsp;</label>
-              <button id="btn-query" class="small" style="width: 100%;">Query</button>
+              <label class="muted" for="btn-query">&nbsp;</label>
+              <button id="btn-query" type="button" class="small" style="width: 100%;" aria-label="Execute Query">Query</button>
             </div>
           </div>
 
@@ -541,8 +891,8 @@
               <input id="q-sort-by" type="text" placeholder="field name" />
             </div>
             <div style="width: 120px;">
-              <label class="muted">Order</label>
-              <select id="q-sort-order">
+              <label class="muted" for="q-sort-order">Order</label>
+              <select id="q-sort-order" title="Sort order: Ascending or Descending" aria-label="Order">
                 <option value="asc">Ascending</option>
                 <option value="desc">Descending</option>
               </select>
@@ -603,9 +953,17 @@
           <div class="flex" style="margin-top: 8px;">
             <button id="btn-update" class="small">Update</button>
             <button id="btn-delete" class="small warn">Delete</button>
-            <button id="btn-schema" class="small ghost">Schema</button>
-            <button id="btn-metadata" class="small ghost">Metadata</button>
+            <button id="btn-schema" class="small ghost">View Schema</button>
+            <button id="btn-metadata" class="small ghost">View Metadata</button>
           </div>
+        </div>
+
+        <div class="card" style="margin-top: 16px; display: none;" id="schema-viewer-card">
+          <div class="flex" style="justify-content: space-between; margin-bottom: 12px;">
+            <h3 style="margin: 0;">Dataset Schema</h3>
+            <button id="btn-close-schema" class="small ghost">×</button>
+          </div>
+          <div id="schema-viewer" class="schema-viewer"></div>
         </div>
       </div>
 
@@ -636,7 +994,7 @@
           <h3 style="margin-top: 0;">Import CSV</h3>
           <div class="file-input">
             <input id="csv-file" type="file" accept=".csv,text/csv" />
-            <select id="import-mode">
+            <select id="import-mode" aria-label="Import mode">
               <option value="append">Append</option>
               <option value="replace">Replace</option>
             </select>
@@ -654,10 +1012,21 @@
       </div>
 
       <!-- API Docs Tab -->
-      <div class="tab-content" id="tab-docs">
+      <div class="tab-content" id="tab-docs" role="tabpanel">
         <div class="card">
-          <h3 style="margin-top: 0;">API Documentation</h3>
+          <div class="flex" style="justify-content: space-between; margin-bottom: 12px;">
+            <h3 style="margin: 0;">API Documentation</h3>
+            <div class="flex">
+              <input type="text" id="endpoint-search" placeholder="Search endpoints..." aria-label="Search endpoints" style="width: 200px; margin-right: 8px;" />
+              <button id="btn-refresh-docs" class="small ghost">Refresh</button>
+            </div>
+          </div>
           <div id="api-docs" style="max-height: 600px; overflow: auto;"></div>
+        </div>
+
+        <div class="card" style="margin-top: 16px;">
+          <h3 style="margin-top: 0;">Interactive Endpoint Explorer</h3>
+          <div id="endpoint-explorer"></div>
         </div>
 
         <div class="card" style="margin-top: 16px;">
@@ -666,6 +1035,9 @@
             <button class="tab small active" data-code-tab="curl">cURL</button>
             <button class="tab small" data-code-tab="python">Python</button>
             <button class="tab small" data-code-tab="javascript">JavaScript</button>
+            <button class="tab small" data-code-tab="go">Go</button>
+            <button class="tab small" data-code-tab="ruby">Ruby</button>
+            <button class="tab small" data-code-tab="php">PHP</button>
           </div>
           <div id="code-examples"></div>
         </div>
@@ -707,6 +1079,27 @@
               <label class="muted">&nbsp;</label>
               <button id="btn-tokenize" class="small" style="width: 100%;">Tokenize</button>
             </div>
+          </div>
+
+          <div class="card" style="margin-bottom: 16px;">
+            <div class="flex" style="justify-content: space-between; margin-bottom: 8px;">
+              <h4 style="margin: 0;">Available Models</h4>
+              <button id="btn-refresh-models" class="small ghost">Refresh</button>
+            </div>
+            <div id="models-list" class="muted" style="font-size: 12px;">Loading models...</div>
+          </div>
+
+          <div class="card" style="margin-bottom: 16px;">
+            <div class="flex" style="justify-content: space-between; margin-bottom: 8px;">
+              <h4 style="margin: 0;">Offline Examples</h4>
+              <button id="btn-load-offline-example" class="small ghost">Load Example</button>
+            </div>
+            <p class="muted" style="font-size: 12px; margin-bottom: 8px;">
+              Try tokenizer with pre-canned examples from the tokenizer_examples.csv dataset. Works offline!
+            </p>
+            <select id="offline-examples-select" style="margin-bottom: 8px;" aria-label="Select offline example">
+              <option value="">Select an example...</option>
+            </select>
           </div>
 
           <div style="margin-bottom: 16px;">
@@ -757,8 +1150,48 @@
         </div>
       </div>
 
+      <!-- Metadata Tab -->
+      <div class="tab-content" id="tab-metadata" role="tabpanel">
+        <div class="card">
+          <h3 style="margin-top: 0;">Dataset Metadata</h3>
+          <div class="row" style="margin-bottom: 16px;">
+            <div style="flex: 1;">
+              <label class="muted">Dataset Name</label>
+              <input id="metadata-dataset" type="text" placeholder="Enter dataset name" />
+            </div>
+            <div style="width: 150px;">
+              <label class="muted">&nbsp;</label>
+              <button id="btn-load-metadata" class="small" style="width: 100%;">Load Metadata</button>
+            </div>
+          </div>
+
+          <div id="metadata-display" class="card" style="margin-bottom: 16px; display: none;">
+            <h4 style="margin-top: 0;">Current Metadata</h4>
+            <div id="metadata-current" class="muted"></div>
+          </div>
+
+          <div class="card">
+            <h4 style="margin-top: 0;">Update Metadata</h4>
+            <div class="metadata-form">
+              <div>
+                <label class="muted">Description</label>
+                <textarea id="metadata-description" class="json-edit" style="min-height: 80px;" placeholder="Dataset description"></textarea>
+              </div>
+              <div>
+                <label class="muted">Schema Version</label>
+                <input id="metadata-schema-version" type="text" placeholder="e.g., 1.0, 2.0" />
+              </div>
+              <div class="flex">
+                <button id="btn-update-metadata" class="small">Update Metadata</button>
+                <button id="btn-clear-metadata" class="small ghost">Clear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- History Tab -->
-      <div class="tab-content" id="tab-history">
+      <div class="tab-content" id="tab-history" role="tabpanel">
         <div class="card">
           <div class="flex" style="justify-content: space-between; margin-bottom: 12px;">
             <h3 style="margin: 0;">Request History</h3>
@@ -812,6 +1245,11 @@
     filters: [],
     currentResults: null,
     theme: localStorage.getItem('theme') || 'dark',
+    currentSchema: null,
+    currentMetadata: null,
+    healthStatus: null,
+    tokenizerModels: [],
+    offlineExamples: [],
   };
 
   // Initialize theme
@@ -829,6 +1267,39 @@
     container.appendChild(toast);
     setTimeout(() => toast.remove(), duration);
     return toast;
+  }
+
+  // Enhanced error message formatter
+  function formatError(error) {
+    if (!error) return 'Unknown error occurred';
+    
+    // Check if it's an enhanced error with details
+    if (error.details && error.details.message) {
+      let message = error.details.message;
+      if (error.details.suggestions && error.details.suggestions.length > 0) {
+        message += ' (See console for suggestions)';
+        console.error('Error details:', error.details);
+        console.error('Suggestions:', error.details.suggestions);
+      }
+      return message;
+    }
+    
+    // Handle standard Error objects
+    if (error.message) {
+      // Provide more helpful messages for common errors
+      if (error.message.includes('Failed to fetch')) {
+        return 'Failed to connect to API server. Check if server is running and URL is correct.';
+      }
+      if (error.message.includes('CORS')) {
+        return 'CORS error: Server must allow requests from this origin.';
+      }
+      if (error.message.includes('NetworkError')) {
+        return 'Network error: Check your connection and server accessibility.';
+      }
+      return error.message;
+    }
+    
+    return String(error);
   }
 
   // Set status
@@ -915,9 +1386,57 @@
       return {ok: resp.ok, status: resp.status, payload, resp, timing};
     } catch (err) {
       timing.end = performance.now() - timing.start;
-      showRaw('raw-response', String(err));
       updateConnectionQuality(null);
-      throw err;
+      
+      // Enhanced error handling with detailed messages
+      let errorMessage = err.message || String(err);
+      let errorDetails = {
+        type: 'NetworkError',
+        message: errorMessage,
+        url: url,
+        method: method,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Detect specific error types
+      if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
+        errorDetails.type = 'FetchError';
+        errorDetails.message = 'Failed to connect to the API server';
+        errorDetails.suggestions = [
+          'Check if the API server is running',
+          'Verify the API base URL is correct',
+          'Check for CORS issues (server must allow your origin)',
+          'Ensure the URL uses http:// or https:// protocol',
+          'Check your network connection'
+        ];
+      } else if (err.name === 'TypeError' && err.message.includes('NetworkError')) {
+        errorDetails.type = 'NetworkError';
+        errorDetails.message = 'Network request failed';
+        errorDetails.suggestions = [
+          'Check your internet connection',
+          'Verify the server is accessible',
+          'Check firewall settings'
+        ];
+      } else if (err.message && err.message.includes('CORS')) {
+        errorDetails.type = 'CORSError';
+        errorDetails.message = 'CORS (Cross-Origin Resource Sharing) error';
+        errorDetails.suggestions = [
+          'The API server must include your origin in CORS allowed origins',
+          'Check server CORS configuration',
+          'For development, the server may need to allow all origins (*)'
+        ];
+      }
+      
+      showRaw('raw-response', {
+        error: errorDetails,
+        originalError: errorMessage
+      });
+      
+      // Create enhanced error object
+      const enhancedError = new Error(errorDetails.message);
+      enhancedError.details = errorDetails;
+      enhancedError.originalError = err;
+      throw enhancedError;
     }
   }
 
@@ -979,8 +1498,12 @@
       }
     } catch (e) {
       setStatus('error', 'err');
-      showToast('Network error: ' + e.message, 'error');
-      console.error(e);
+      const errorMsg = formatError(e);
+      showToast(errorMsg, 'error', 5000);
+      console.error('Error loading datasets:', e);
+      if (e.details) {
+        console.error('Error details:', e.details);
+      }
     }
   }
 
@@ -995,13 +1518,142 @@
       const name = fn.replace(/\.csv$/i, '');
       const el = document.createElement('div');
       el.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 6px; border-bottom: 1px solid var(--border); cursor: pointer;';
-      el.innerHTML = `<div style="font-size: 14px;">${name}</div>`;
+      el.innerHTML = `
+        <div style="font-size: 14px; flex: 1;">${name}</div>
+        <div class="flex" style="gap: 4px;">
+          <button class="small ghost" onclick="event.stopPropagation(); viewSchema('${name}');" title="View schema">📋</button>
+          <button class="small ghost" onclick="event.stopPropagation(); loadMetadataForDataset('${name}');" title="View metadata">ℹ️</button>
+        </div>
+      `;
       el.onclick = () => {
         document.getElementById('selected-dataset').value = name;
         state.currentDataset = name;
+        updateBreadcrumb(name);
       };
       container.appendChild(el);
     });
+  }
+
+  // Schema viewer
+  async function viewSchema(datasetName) {
+    const name = datasetName || document.getElementById('selected-dataset').value.trim() || state.currentDataset;
+    if (!name) {
+      showToast('Select a dataset first', 'warning');
+      return;
+    }
+    try {
+      setStatus('loading schema...', '');
+      const res = await runFetch('GET', `/datasets/${encodeURIComponent(name)}/schema`);
+      if (res.ok) {
+        state.currentSchema = res.payload;
+        renderSchema(res.payload);
+        document.getElementById('schema-viewer-card').style.display = 'block';
+        showToast('Schema loaded', 'success');
+        setStatus('schema loaded', 'ok');
+      } else {
+        showToast('Failed to load schema', 'error');
+      }
+    } catch (e) {
+      showToast('Schema error: ' + e.message, 'error');
+    }
+  }
+
+  function renderSchema(schema) {
+    const container = document.getElementById('schema-viewer');
+    if (!schema.columns || schema.columns.length === 0) {
+      container.innerHTML = '<div class="muted">No columns found</div>';
+      return;
+    }
+    let html = '<div class="schema-viewer">';
+    schema.columns.forEach(col => {
+      const inferredType = inferColumnType(col);
+      html += `
+        <div class="schema-column">
+          <span class="schema-column-name">${escapeHtml(col)}</span>
+          <span class="schema-column-type">${inferredType}</span>
+        </div>
+      `;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  function inferColumnType(columnName) {
+    const name = columnName.toLowerCase();
+    if (name.includes('id') || name.includes('uuid')) return 'ID';
+    if (name.includes('date') || name.includes('time') || name.includes('created') || name.includes('updated')) return 'Date/Time';
+    if (name.includes('email')) return 'Email';
+    if (name.includes('url') || name.includes('link')) return 'URL';
+    if (name.includes('count') || name.includes('num') || name.includes('score') || name.includes('amount')) return 'Number';
+    if (name.includes('active') || name.includes('enabled') || name.includes('status')) return 'Boolean';
+    return 'String';
+  }
+
+  // Metadata management
+  async function loadMetadataForDataset(datasetName) {
+    const name = datasetName || document.getElementById('metadata-dataset').value.trim() || state.currentDataset;
+    if (!name) {
+      showToast('Enter a dataset name', 'warning');
+      return;
+    }
+    try {
+      setStatus('loading metadata...', '');
+      const res = await runFetch('GET', `/datasets/${encodeURIComponent(name)}/metadata`);
+      if (res.ok) {
+        state.currentMetadata = res.payload;
+        renderMetadata(res.payload);
+        document.getElementById('metadata-dataset').value = name;
+        document.getElementById('metadata-display').style.display = 'block';
+        showToast('Metadata loaded', 'success');
+        setStatus('metadata loaded', 'ok');
+      } else {
+        showToast('Failed to load metadata', 'error');
+      }
+    } catch (e) {
+      showToast('Metadata error: ' + e.message, 'error');
+    }
+  }
+
+  function renderMetadata(metadata) {
+    const container = document.getElementById('metadata-current');
+    container.innerHTML = `
+      <div><strong>Description:</strong> ${metadata.description || '(none)'}</div>
+      <div><strong>Schema Version:</strong> ${metadata.schema_version || '1.0'}</div>
+      <div><strong>Created:</strong> ${metadata.created_at ? new Date(metadata.created_at).toLocaleString() : '(unknown)'}</div>
+      <div><strong>Updated:</strong> ${metadata.updated_at ? new Date(metadata.updated_at).toLocaleString() : '(unknown)'}</div>
+    `;
+    document.getElementById('metadata-description').value = metadata.description || '';
+    document.getElementById('metadata-schema-version').value = metadata.schema_version || '';
+  }
+
+  async function updateMetadata() {
+    const name = document.getElementById('metadata-dataset').value.trim();
+    if (!name) {
+      showToast('Enter a dataset name', 'warning');
+      return;
+    }
+    const description = document.getElementById('metadata-description').value.trim();
+    const schemaVersion = document.getElementById('metadata-schema-version').value.trim();
+    const payload = {};
+    if (description) payload.description = description;
+    if (schemaVersion) payload.schema_version = schemaVersion;
+    if (Object.keys(payload).length === 0) {
+      showToast('Enter at least one field to update', 'warning');
+      return;
+    }
+    try {
+      setStatus('updating metadata...', '');
+      const res = await runFetch('PUT', `/datasets/${encodeURIComponent(name)}/metadata`, {json: payload});
+      if (res.ok) {
+        showToast('Metadata updated', 'success');
+        loadMetadataForDataset(name);
+        setStatus('metadata updated', 'ok');
+      } else {
+        showToast('Failed to update metadata', 'error');
+      }
+    } catch (e) {
+      showToast('Update error: ' + e.message, 'error');
+    }
   }
 
   // Query rows
@@ -1047,8 +1699,10 @@
         showToast(`Query failed: ${res.status}`, 'error');
       }
     } catch (e) {
-      showToast('Query error: ' + e.message, 'error');
-      console.error(e);
+      const errorMsg = formatError(e);
+      showToast(errorMsg, 'error', 5000);
+      console.error('Query error:', e);
+      if (e.details) console.error('Error details:', e.details);
     }
   }
 
@@ -1121,7 +1775,9 @@
         showToast('Create failed: ' + JSON.stringify(res.payload), 'error');
       }
     } catch (e) {
-      showToast('Create error: ' + e.message, 'error');
+      const errorMsg = formatError(e);
+      showToast(errorMsg, 'error', 5000);
+      console.error('Create error:', e);
     }
   }
 
@@ -1169,7 +1825,9 @@
         showToast('Delete failed', 'error');
       }
     } catch (e) {
-      showToast('Delete error: ' + e.message, 'error');
+      const errorMsg = formatError(e);
+      showToast(errorMsg, 'error', 5000);
+      console.error('Delete error:', e);
     }
   }
 
@@ -1345,11 +2003,64 @@
     try {
       const res = await runFetch('GET', '/health');
       if (res.ok) {
+        state.healthStatus = res.payload;
+        updateHealthStatus(res.payload, true);
         showToast('Health check passed', 'success');
         showRaw('raw-response', res.payload);
+      } else {
+        updateHealthStatus(null, false);
       }
     } catch (e) {
+      updateHealthStatus(null, false);
       showToast('Health check failed', 'error');
+    }
+  }
+
+  async function readinessCheck() {
+    try {
+      const res = await runFetch('GET', '/health/ready');
+      if (res.ok) {
+        showToast('Service is ready', 'success');
+        showRaw('raw-response', res.payload);
+      } else {
+        showToast('Service not ready', 'warning');
+      }
+    } catch (e) {
+      showToast('Readiness check failed', 'error');
+    }
+  }
+
+  function updateHealthStatus(health, isHealthy) {
+    const badge = document.getElementById('health-badge');
+    const indicator = document.getElementById('health-indicator');
+    const text = document.getElementById('health-text');
+    const details = document.getElementById('health-details');
+    
+    if (isHealthy && health) {
+      badge.className = 'status-badge healthy';
+      indicator.className = 'connection-indicator excellent';
+      text.textContent = 'Healthy';
+      details.textContent = `Version ${health.version || 'unknown'} | ${health.timestamp ? new Date(health.timestamp).toLocaleTimeString() : ''}`;
+    } else {
+      badge.className = 'status-badge unhealthy';
+      indicator.className = 'connection-indicator poor';
+      text.textContent = 'Unhealthy';
+      details.textContent = 'Service unavailable';
+    }
+  }
+
+  // Auto-refresh health status
+  let healthInterval = null;
+  function startHealthMonitoring() {
+    if (healthInterval) clearInterval(healthInterval);
+    healthCheck();
+    healthInterval = setInterval(healthCheck, 30000); // Every 30 seconds
+  }
+
+  function stopHealthMonitoring() {
+    if (healthInterval) {
+      clearInterval(healthInterval);
+      healthInterval = null;
     }
   }
 
@@ -1475,11 +2186,154 @@
       const res = await runFetch('GET', '/openapi.json');
       if (res.ok) {
         const docs = res.payload;
-        const container = document.getElementById('api-docs');
-        container.innerHTML = '<pre>' + JSON.stringify(docs, null, 2) + '</pre>';
+        renderApiDocs(docs);
+        renderEndpointExplorer(docs);
       }
     } catch (e) {
-      document.getElementById('api-docs').innerHTML = '<div class="muted">Could not load API docs</div>';
+      const errorMsg = formatError(e);
+      document.getElementById('api-docs').innerHTML = `
+        <div class="muted">
+          <p><strong>Could not load API docs</strong></p>
+          <p>${errorMsg}</p>
+          <p style="margin-top: 12px; font-size: 12px;">
+            <strong>Common issues:</strong><br>
+            • API server is not running<br>
+            • Incorrect API base URL<br>
+            • CORS configuration issue<br>
+            • Network connectivity problem
+          </p>
+        </div>
+      `;
+      console.error('API docs load error:', e);
+      if (e.details) console.error('Error details:', e.details);
+    }
+  }
+
+  function renderApiDocs(docs) {
+    const container = document.getElementById('api-docs');
+    container.innerHTML = `
+      <div style="margin-bottom: 16px;">
+        <h4>API Information</h4>
+        <div class="muted">
+          <div><strong>Title:</strong> ${docs.info?.title || 'N/A'}</div>
+          <div><strong>Version:</strong> ${docs.info?.version || 'N/A'}</div>
+          <div><strong>Base URL:</strong> ${docs.servers?.[0]?.url || 'N/A'}</div>
+        </div>
+      </div>
+      <details>
+        <summary style="cursor: pointer; margin-bottom: 8px;"><strong>Full OpenAPI Specification (JSON)</strong></summary>
+        <pre style="max-height: 400px; overflow: auto;">${JSON.stringify(docs, null, 2)}</pre>
+      </details>
+    `;
+  }
+
+  function renderEndpointExplorer(docs) {
+    const container = document.getElementById('endpoint-explorer');
+    if (!docs.paths) {
+      container.innerHTML = '<div class="muted">No endpoints found</div>';
+      return;
+    }
+    let html = '';
+    const searchTerm = document.getElementById('endpoint-search')?.value.toLowerCase() || '';
+    Object.entries(docs.paths).forEach(([path, methods]) => {
+      if (searchTerm && !path.toLowerCase().includes(searchTerm)) return;
+      Object.entries(methods).forEach(([method, details]) => {
+        if (searchTerm && !details.summary?.toLowerCase().includes(searchTerm)) return;
+        html += `
+          <div class="endpoint-item">
+            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+              <div>
+                <span class="endpoint-method ${method}">${method.toUpperCase()}</span>
+                <strong>${path}</strong>
+                <span class="muted" style="margin-left: 8px;">${details.summary || ''}</span>
+              </div>
+              <span>▼</span>
+            </div>
+            <div class="endpoint-content">
+              <div style="margin-bottom: 8px;"><strong>Description:</strong> ${details.description || details.summary || 'No description'}</div>
+              ${details.parameters ? `
+                <div style="margin-bottom: 8px;">
+                  <strong>Parameters:</strong>
+                  <ul style="margin: 4px 0; padding-left: 20px;">
+                    ${details.parameters.map(p => `<li>${p.name} (${p.in}): ${p.description || ''}</li>`).join('')}
+                  </ul>
+                </div>
+              ` : ''}
+              <div>
+                <button class="small ghost" onclick="tryEndpoint('${method}', '${path}')">Try it out</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    });
+    container.innerHTML = html || '<div class="muted">No endpoints match your search</div>';
+  }
+
+  function toggleEndpoint(header) {
+    const item = header.closest('.endpoint-item');
+    item.classList.toggle('expanded');
+    const arrow = header.querySelector('span:last-child');
+    arrow.textContent = item.classList.contains('expanded') ? '▲' : '▼';
+  }
+
+  function tryEndpoint(method, path) {
+    showToast(`Would execute ${method.toUpperCase()} ${path}`, 'info');
+    // Could implement actual try-it-out functionality here
+  }
+
+  // Sidebar navigation
+  function initSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const toggle = document.getElementById('sidebar-toggle');
+    const mainContent = document.getElementById('main-content');
+    
+    toggle.onclick = () => {
+      sidebar.classList.toggle('open');
+      if (window.innerWidth > 768) {
+        mainContent.style.marginLeft = sidebar.classList.contains('open') ? '280px' : '0';
+      }
+    };
+
+    // Close sidebar on mobile when clicking outside
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+        if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
+          sidebar.classList.remove('open');
+        }
+      }
+    });
+
+    // Sidebar links
+    document.querySelectorAll('.sidebar-link[data-tab]').forEach(link => {
+      link.onclick = (e) => {
+        e.preventDefault();
+        const tab = link.dataset.tab;
+        document.querySelector(`.tab[data-tab="${tab}"]`)?.click();
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('open');
+        }
+      };
+    });
+
+    document.querySelectorAll('.sidebar-link[data-action]').forEach(link => {
+      link.onclick = (e) => {
+        e.preventDefault();
+        const action = link.dataset.action;
+        if (action === 'health') healthCheck();
+        else if (action === 'ready') readinessCheck();
+        else if (action === 'metrics') getMetrics();
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('open');
+        }
+      };
+    });
+  }
+
+  function updateBreadcrumb(current) {
+    const breadcrumb = document.getElementById('breadcrumb-current');
+    if (breadcrumb) {
+      breadcrumb.textContent = current || 'Dashboard';
     }
   }
 
@@ -1560,7 +2414,82 @@ fetch(\`\${base}/datasets/${name}/rows/123\`, {
 
 // Delete row
 fetch(\`\${base}/datasets/${name}/rows/123\`, {method: 'DELETE'})
-  .then(r => console.log(r.status));`
+  .then(r => console.log(r.status));`,
+      go: `package main
+
+import (
+    "bytes"
+    "encoding/json"
+    "fmt"
+    "net/http"
+)
+
+const base = "${base}"
+
+func main() {
+    // List datasets
+    resp, _ := http.Get(base + "/datasets")
+    defer resp.Body.Close()
+    
+    // Query rows
+    resp, _ = http.Get(base + "/datasets/${name}/rows?search=test&limit=10")
+    defer resp.Body.Close()
+    
+    // Create row
+    data := map[string]interface{}{"name": "Test", "value": 123}
+    jsonData, _ := json.Marshal(data)
+    resp, _ = http.Post(base+"/datasets/${name}/rows", "application/json", bytes.NewBuffer(jsonData))
+    defer resp.Body.Close()
+}`,
+      ruby: `require 'net/http'
+require 'json'
+require 'uri'
+
+base = "${base}"
+
+# List datasets
+uri = URI("#{base}/datasets")
+response = Net::HTTP.get_response(uri)
+puts JSON.parse(response.body)
+
+# Query rows
+uri = URI("#{base}/datasets/${name}/rows")
+uri.query = URI.encode_www_form(search: "test", limit: 10)
+response = Net::HTTP.get_response(uri)
+puts JSON.parse(response.body)
+
+# Create row
+uri = URI("#{base}/datasets/${name}/rows")
+http = Net::HTTP.new(uri.host, uri.port)
+request = Net::HTTP::Post.new(uri)
+request['Content-Type'] = 'application/json'
+request.body = {name: "Test", value: 123}.to_json
+response = http.request(request)
+puts JSON.parse(response.body)`,
+      php: `<?php
+$base = "${base}";
+
+// List datasets
+$response = file_get_contents("$base/datasets");
+$data = json_decode($response, true);
+print_r($data);
+
+// Query rows
+$url = "$base/datasets/${name}/rows?" . http_build_query(['search' => 'test', 'limit' => 10]);
+$response = file_get_contents($url);
+$data = json_decode($response, true);
+print_r($data);
+
+// Create row
+$ch = curl_init("$base/datasets/${name}/rows");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['name' => 'Test', 'value' => 123]));
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response;
+?>`
     };
     
     const container = document.getElementById('code-examples');
@@ -1622,23 +2551,34 @@ fetch(\`\${base}/datasets/${name}/rows/123\`, {method: 'DELETE'})
   // Tab switching
   document.querySelectorAll('.tab[data-tab]').forEach(btn => {
     btn.onclick = () => {
-      document.querySelectorAll('.tab[data-tab]').forEach(b => b.classList.remove('active'));
+      const tabName = btn.dataset.tab;
+      updateTabAria(tabName);
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+      updateBreadcrumb(tabName.charAt(0).toUpperCase() + tabName.slice(1));
       
-      if (btn.dataset.tab === 'docs') {
+      if (tabName === 'docs') {
         loadApiDocs();
         loadCodeExamples();
         loadQuickStart();
         loadFAQ();
-      } else if (btn.dataset.tab === 'history') {
+      } else if (tabName === 'history') {
         renderHistory();
-      } else if (btn.dataset.tab === 'tokenizer') {
+      } else if (tabName === 'tokenizer') {
         loadTokenizerModels();
+        loadOfflineExamples();
+      } else if (tabName === 'metadata') {
+        const name = document.getElementById('selected-dataset').value.trim() || state.currentDataset;
+        if (name) {
+          document.getElementById('metadata-dataset').value = name;
+          loadMetadataForDataset(name);
+        }
       }
     };
   });
+  
+  // Set initial active tab
+  updateTabAria('query');
 
   // Event handlers
   document.getElementById('api-base').value = state.baseUrl;
@@ -1655,7 +2595,12 @@ fetch(\`\${base}/datasets/${name}/rows/123\`, {method: 'DELETE'})
         listDatasets();
       }
     } catch (e) {
-      showToast('Connection failed: ' + e.message, 'error');
+      const errorMsg = formatError(e);
+      showToast(errorMsg, 'error', 5000);
+      console.error('Connection test failed:', e);
+      if (e.details) {
+        console.error('Troubleshooting suggestions:', e.details.suggestions);
+      }
     }
   };
   document.getElementById('btn-refresh').onclick = listDatasets;
@@ -1672,7 +2617,19 @@ fetch(\`\${base}/datasets/${name}/rows/123\`, {method: 'DELETE'})
   document.getElementById('btn-export-csv-file').onclick = exportCsvFile;
   document.getElementById('btn-export-json-file').onclick = exportJsonFile;
   document.getElementById('btn-health').onclick = healthCheck;
+  document.getElementById('btn-ready').onclick = readinessCheck;
   document.getElementById('btn-metrics').onclick = getMetrics;
+  
+  // Enhanced error handling
+  window.addEventListener('error', (e) => {
+    console.error('Global error:', e.error);
+    showToast('An error occurred. Check console for details.', 'error', 5000);
+  });
+  
+  window.addEventListener('unhandledrejection', (e) => {
+    console.error('Unhandled promise rejection:', e.reason);
+    showToast('Network error: ' + (e.reason?.message || 'Unknown error'), 'error', 5000);
+  });
   document.getElementById('btn-add-filter').onclick = addFilter;
   document.getElementById('btn-save-preset').onclick = savePreset;
   document.getElementById('btn-clear-history').onclick = () => {
@@ -1738,10 +2695,74 @@ fetch(\`\${base}/datasets/${name}/rows/123\`, {method: 'DELETE'})
   });
 
   // Initialize
+  initSidebar();
   renderPresets();
   if (state.baseUrl) {
     listDatasets();
+    startHealthMonitoring();
   }
+  
+  // Initialize tokenizer with fallback models and examples
+  loadFallbackModels();
+  loadFallbackOfflineExamples();
+  
+  // Load offline examples on tokenizer tab
+  document.getElementById('offline-examples-select').onchange = loadOfflineExample;
+  
+  // Enhanced event handlers
+  document.getElementById('btn-schema').onclick = () => viewSchema();
+  document.getElementById('btn-close-schema').onclick = () => {
+    document.getElementById('schema-viewer-card').style.display = 'none';
+  };
+  document.getElementById('btn-metadata').onclick = () => {
+    const name = document.getElementById('selected-dataset').value.trim() || state.currentDataset;
+    if (name) {
+      document.getElementById('metadata-dataset').value = name;
+      loadMetadataForDataset(name);
+      // Switch to metadata tab
+      document.querySelector('.tab[data-tab="metadata"]')?.click();
+    } else {
+      showToast('Select a dataset first', 'warning');
+    }
+  };
+  document.getElementById('btn-load-metadata').onclick = () => loadMetadataForDataset();
+  document.getElementById('btn-update-metadata').onclick = updateMetadata;
+  document.getElementById('btn-clear-metadata').onclick = () => {
+    document.getElementById('metadata-description').value = '';
+    document.getElementById('metadata-schema-version').value = '';
+  };
+  document.getElementById('btn-refresh-datasets').onclick = listDatasets;
+  document.getElementById('btn-refresh-models').onclick = loadTokenizerModels;
+  document.getElementById('btn-load-offline-example').onclick = loadOfflineExample;
+  document.getElementById('btn-refresh-docs').onclick = loadApiDocs;
+  document.getElementById('endpoint-search')?.addEventListener('input', (e) => {
+    // Debounce search
+    clearTimeout(window.searchTimeout);
+    window.searchTimeout = setTimeout(() => {
+      const res = runFetch('GET', '/openapi.json').then(r => {
+        if (r.ok) renderEndpointExplorer(r.payload);
+      }).catch(() => {});
+    }, 300);
+  });
+  
+  // Enhanced tab switching
+  document.querySelectorAll('.tab[data-tab]').forEach(btn => {
+    btn.setAttribute('role', 'tab');
+    btn.setAttribute('aria-selected', 'false');
+  });
+  
+  // Update tab ARIA attributes
+  const updateTabAria = (activeTab) => {
+    document.querySelectorAll('.tab[data-tab]').forEach(tab => {
+      const isActive = tab.dataset.tab === activeTab;
+      tab.setAttribute('aria-selected', isActive);
+      tab.classList.toggle('active', isActive);
+    });
+    document.querySelectorAll('.tab-content').forEach(content => {
+      content.setAttribute('role', 'tabpanel');
+      content.setAttribute('aria-hidden', content.classList.contains('active') ? 'false' : 'true');
+    });
+  };
 
   // Tokenizer functions
   let tokenizerState = {
@@ -1751,16 +2772,162 @@ fetch(\`\${base}/datasets/${name}/rows/123\`, {method: 'DELETE'})
   };
 
   async function loadTokenizerModels() {
+    if (!state.baseUrl) {
+      // No API URL set, use fallback models
+      loadFallbackModels();
+      return;
+    }
+
     try {
       const res = await runFetch('GET', '/tokenize/models');
-      if (res.ok && res.payload.available) {
-        // Models loaded, ready to tokenize
+      if (res.ok && res.payload && res.payload.available) {
+        state.tokenizerModels = res.payload.models || [];
+        if (state.tokenizerModels.length > 0) {
+          renderTokenizerModels(state.tokenizerModels);
+          updateModelSelector(state.tokenizerModels);
+          showToast('Models loaded', 'success');
+        } else {
+          loadFallbackModels();
+        }
       } else {
-        showToast('Tokenizer service not available', 'warning');
+        showToast('Tokenizer service not available, using fallback models', 'warning');
+        loadFallbackModels();
       }
     } catch (e) {
-      showToast('Could not load tokenizer models', 'error');
+      console.warn('Could not load tokenizer models from API:', e);
+      showToast('Using fallback models (API unavailable)', 'info');
+      loadFallbackModels();
     }
+  }
+
+  function renderTokenizerModels(models) {
+    const container = document.getElementById('models-list');
+    if (!models || models.length === 0) {
+      container.innerHTML = '<div class="muted">No models available</div>';
+      return;
+    }
+    let html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px;">';
+    models.forEach(model => {
+      html += `
+        <div class="card" style="padding: 8px;">
+          <div style="font-weight: 600; margin-bottom: 4px;">${escapeHtml(model.model)}</div>
+          <div class="muted" style="font-size: 11px;">
+            Encoding: ${escapeHtml(model.encoding)}<br>
+            Context: ${model.context_window.toLocaleString()} tokens
+          </div>
+        </div>
+      `;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  function updateModelSelector(models) {
+    const selector = document.getElementById('tokenizer-model');
+    const currentValue = selector.value;
+    selector.innerHTML = '';
+    models.forEach(model => {
+      const option = document.createElement('option');
+      option.value = model.model;
+      option.textContent = `${model.model} (${model.context_window.toLocaleString()} tokens)`;
+      if (model.model === currentValue) option.selected = true;
+      selector.appendChild(option);
+    });
+  }
+
+  function loadFallbackModels() {
+    const fallbackModels = [
+      {model: 'gpt-4', encoding: 'cl100k_base', context_window: 8192},
+      {model: 'gpt-4-turbo', encoding: 'cl100k_base', context_window: 128000},
+      {model: 'gpt-3.5-turbo', encoding: 'cl100k_base', context_window: 4096},
+      {model: 'gpt-3.5-turbo-16k', encoding: 'cl100k_base', context_window: 16384},
+      {model: 'text-davinci-003', encoding: 'p50k_base', context_window: 4097},
+      {model: 'cl100k_base', encoding: 'cl100k_base', context_window: 8192},
+      {model: 'p50k_base', encoding: 'p50k_base', context_window: 2048},
+      {model: 'r50k_base', encoding: 'r50k_base', context_window: 2048},
+    ];
+    state.tokenizerModels = fallbackModels;
+    renderTokenizerModels(fallbackModels);
+    updateModelSelector(fallbackModels);
+  }
+
+  // Offline tokenizer examples
+  async function loadOfflineExamples() {
+    if (!state.baseUrl) {
+      // No API URL, use fallback examples
+      loadFallbackOfflineExamples();
+      return;
+    }
+
+    try {
+      const name = 'tokenizer_examples';
+      const res = await runFetch('GET', `/datasets/${encodeURIComponent(name)}/rows?limit=100`);
+      if (res.ok && res.payload && res.payload.rows && res.payload.rows.length > 0) {
+        state.offlineExamples = res.payload.rows;
+        renderOfflineExamples(res.payload.rows);
+      } else {
+        loadFallbackOfflineExamples();
+      }
+    } catch (e) {
+      console.warn('Could not load offline examples from API:', e);
+      loadFallbackOfflineExamples();
+    }
+  }
+
+  function loadFallbackOfflineExamples() {
+    state.offlineExamples = [
+      {
+        question: 'What is artificial intelligence?',
+        response: 'Artificial intelligence (AI) is the simulation of human intelligence in machines that are programmed to think and learn like humans. It encompasses machine learning, natural language processing, computer vision, and robotics.',
+        model: 'gpt-4',
+        token_count: 45
+      },
+      {
+        question: 'How does machine learning work?',
+        response: 'Machine learning enables systems to learn from experience without explicit programming. It uses algorithms to analyze data, identify patterns, and make decisions or predictions based on that analysis.',
+        model: 'gpt-4',
+        token_count: 52
+      },
+      {
+        question: 'What is tokenization in NLP?',
+        response: 'Tokenization is the process of breaking down text into smaller units called tokens. These tokens are then used by language models to understand and generate text. Tokenization helps models manage context windows and process information efficiently.',
+        model: 'gpt-4',
+        token_count: 58
+      },
+      {
+        question: 'Explain transformer architecture',
+        response: 'Transformer architecture is a deep learning model that uses self-attention mechanisms to process sequences of data. It revolutionized NLP by enabling parallel processing and better understanding of long-range dependencies in text.',
+        model: 'gpt-4',
+        token_count: 48
+      }
+    ];
+    renderOfflineExamples(state.offlineExamples);
+  }
+
+  function renderOfflineExamples(examples) {
+    const selector = document.getElementById('offline-examples-select');
+    selector.innerHTML = '<option value="">Select an example...</option>';
+    examples.forEach((ex, i) => {
+      const option = document.createElement('option');
+      option.value = i;
+      option.textContent = `${ex.question || ex.response?.substring(0, 50) || 'Example ' + (i + 1)} (${ex.model || 'gpt-4'})`;
+      selector.appendChild(option);
+    });
+  }
+
+  function loadOfflineExample() {
+    const index = document.getElementById('offline-examples-select').value;
+    if (index === '' || !state.offlineExamples[index]) {
+      showToast('Select an example first', 'warning');
+      return;
+    }
+    const example = state.offlineExamples[index];
+    const text = example.question ? `${example.question}\n\n${example.response}` : example.response;
+    document.getElementById('tokenizer-input').value = text;
+    if (example.model) {
+      document.getElementById('tokenizer-model').value = example.model;
+    }
+    showToast('Example loaded', 'success');
   }
 
   async function tokenizeText() {
@@ -1772,13 +2939,19 @@ fetch(\`\${base}/datasets/${name}/rows/123\`, {method: 'DELETE'})
       return;
     }
 
+    if (!state.baseUrl) {
+      showToast('Please set API base URL first', 'warning');
+      document.getElementById('api-base-url').focus();
+      return;
+    }
+
     try {
       setStatus('tokenizing...', '');
       const res = await runFetch('POST', '/tokenize', {
         json: { text, model }
       });
 
-      if (res.ok) {
+      if (res.ok && res.payload) {
         tokenizerState.currentResult = res.payload;
         renderTokenStats(res.payload);
         renderTokenBreakdown(res.payload);
@@ -1786,64 +2959,115 @@ fetch(\`\${base}/datasets/${name}/rows/123\`, {method: 'DELETE'})
         setStatus('tokenized', 'ok');
         showToast(`Tokenized: ${res.payload.token_count} tokens`, 'success');
       } else {
-        showToast('Tokenization failed', 'error');
+        const errorMsg = res.payload?.detail || res.payload?.error || 'Tokenization failed';
+        showToast(`Tokenization failed: ${errorMsg}`, 'error');
+        setStatus('error', 'err');
       }
     } catch (e) {
-      showToast('Tokenization error: ' + e.message, 'error');
+      const errorMsg = formatError(e);
+      showToast(errorMsg, 'error', 5000);
       setStatus('error', 'err');
+      console.error('Tokenization error:', e);
+      if (e.details) {
+        console.error('Error details:', e.details);
+        console.error('Troubleshooting:', e.details.suggestions);
+      }
+      
+      // Show helpful message in the UI
+      const container = document.getElementById('token-stats');
+      if (container) {
+        container.innerHTML = `
+          <div class="card" style="padding: 16px; border: 1px solid var(--err);">
+            <div style="color: var(--err); font-weight: 600; margin-bottom: 8px;">⚠️ Tokenization Failed</div>
+            <div class="muted" style="font-size: 12px; margin-bottom: 8px;">${errorMsg}</div>
+            <div class="muted" style="font-size: 11px;">
+              <strong>Possible solutions:</strong><br>
+              • Check if API server is running<br>
+              • Verify API base URL is correct<br>
+              • Ensure /tokenize endpoint is available<br>
+              • Check browser console for details
+            </div>
+          </div>
+        `;
+      }
     }
   }
 
   function renderTokenStats(data) {
+    if (!data) {
+      console.error('No token data provided to renderTokenStats');
+      return;
+    }
+
     const container = document.getElementById('token-stats');
+    if (!container) {
+      console.error('token-stats container not found');
+      return;
+    }
+
+    // Safely access properties with defaults
+    const tokenCount = data.token_count || 0;
+    const charCount = data.character_count || 0;
+    const wordCount = data.word_count || 0;
+    const tokensPerChar = data.tokens_per_character || (tokenCount > 0 && charCount > 0 ? tokenCount / charCount : 0);
+    const tokensPerWord = data.tokens_per_word || (tokenCount > 0 && wordCount > 0 ? tokenCount / wordCount : 0);
+    const estimatedCost = data.estimated_cost_usd || 0;
+
     container.innerHTML = `
       <div class="card" style="padding: 12px;">
         <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Token Count</div>
-        <div style="font-size: 24px; font-weight: 600; color: var(--accent);">${data.token_count.toLocaleString()}</div>
+        <div style="font-size: 24px; font-weight: 600; color: var(--accent);">${tokenCount.toLocaleString()}</div>
       </div>
       <div class="card" style="padding: 12px;">
         <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Character Count</div>
-        <div style="font-size: 24px; font-weight: 600;">${data.character_count.toLocaleString()}</div>
+        <div style="font-size: 24px; font-weight: 600;">${charCount.toLocaleString()}</div>
       </div>
       <div class="card" style="padding: 12px;">
         <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Word Count</div>
-        <div style="font-size: 24px; font-weight: 600;">${data.word_count.toLocaleString()}</div>
+        <div style="font-size: 24px; font-weight: 600;">${wordCount.toLocaleString()}</div>
       </div>
       <div class="card" style="padding: 12px;">
         <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Tokens/Character</div>
-        <div style="font-size: 24px; font-weight: 600;">${data.tokens_per_character.toFixed(3)}</div>
+        <div style="font-size: 24px; font-weight: 600;">${tokensPerChar.toFixed(3)}</div>
       </div>
       <div class="card" style="padding: 12px;">
         <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Tokens/Word</div>
-        <div style="font-size: 24px; font-weight: 600;">${data.tokens_per_word.toFixed(2)}</div>
+        <div style="font-size: 24px; font-weight: 600;">${tokensPerWord.toFixed(2)}</div>
       </div>
       <div class="card" style="padding: 12px;">
         <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Est. Cost (USD)</div>
-        <div style="font-size: 24px; font-weight: 600; color: var(--ok);">$${data.estimated_cost_usd.toFixed(6)}</div>
+        <div style="font-size: 24px; font-weight: 600; color: var(--ok);">$${estimatedCost.toFixed(6)}</div>
       </div>
     `;
 
     // Update context window bar
-    const percent = data.context_usage_percent;
+    const percent = data.context_usage_percent || 0;
+    const contextWindow = data.context_window_size || 8192;
+    const tokensRemaining = data.tokens_remaining || Math.max(0, contextWindow - tokenCount);
     const fill = document.getElementById('context-window-fill');
-    fill.style.width = `${Math.min(percent, 100)}%`;
-    fill.textContent = `${percent.toFixed(1)}%`;
-    
-    if (percent > 90) {
-      fill.style.background = 'linear-gradient(90deg, var(--warn), var(--err))';
-    } else if (percent > 70) {
-      fill.style.background = 'linear-gradient(90deg, var(--ok), var(--warn))';
-    } else {
-      fill.style.background = 'linear-gradient(90deg, var(--ok), #84cc16)';
+    const info = document.getElementById('context-window-info');
+
+    if (fill) {
+      fill.style.width = `${Math.min(percent, 100)}%`;
+      fill.textContent = `${percent.toFixed(1)}%`;
+      
+      if (percent > 90) {
+        fill.style.background = 'linear-gradient(90deg, var(--warn), var(--err))';
+      } else if (percent > 70) {
+        fill.style.background = 'linear-gradient(90deg, var(--ok), var(--warn))';
+      } else {
+        fill.style.background = 'linear-gradient(90deg, var(--ok), #84cc16)';
+      }
     }
 
-    const info = document.getElementById('context-window-info');
-    info.innerHTML = `
-      <strong>${data.token_count.toLocaleString()}</strong> / <strong>${data.context_window_size.toLocaleString()}</strong> tokens used
-      (${data.tokens_remaining.toLocaleString()} remaining)
-      <br>
-      <span class="muted">Model: ${data.model} | Encoding: ${data.encoding}</span>
-    `;
+    if (info) {
+      info.innerHTML = `
+        <strong>${tokenCount.toLocaleString()}</strong> / <strong>${contextWindow.toLocaleString()}</strong> tokens used
+        (${tokensRemaining.toLocaleString()} remaining)
+        <br>
+        <span class="muted">Model: ${data.model || 'unknown'} | Encoding: ${data.encoding || 'unknown'}</span>
+      `;
+    }
   }
 
   function renderTokenBreakdown(data) {
@@ -1959,6 +3183,20 @@ fetch(\`\${base}/datasets/${name}/rows/123\`, {method: 'DELETE'})
   window.state = state;
   window.renderFilters = renderFilters;
   window.renderPresets = renderPresets;
+  window.viewSchema = viewSchema;
+  window.loadMetadataForDataset = loadMetadataForDataset;
+  window.toggleEndpoint = toggleEndpoint;
+  window.tryEndpoint = tryEndpoint;
+  window.loadOfflineExample = loadOfflineExample;
+  
+  // Expose utility functions
+  window.escapeHtml = escapeHtml;
+  window.showToast = showToast;
+  
+  // Cleanup on page unload
+  window.addEventListener('beforeunload', () => {
+    stopHealthMonitoring();
+  });
 })();
 </script>
 </body>

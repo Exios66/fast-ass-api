@@ -9,6 +9,7 @@ This repository uses local CSV files stored in `data/csv/` (configurable via `CS
 ## Features
 
 ### Core Features
+
 - **CRUD Operations**: Create, read, update, delete individual rows
 - **Bulk Operations**: Bulk create, update, and delete multiple rows
 - **Advanced Filtering**: Field-specific filters, date ranges, numeric comparisons, regex support
@@ -19,6 +20,7 @@ This repository uses local CSV files stored in `data/csv/` (configurable via `CS
 - **Structured Logging**: Request IDs and detailed logging
 
 ### API Features
+
 - **CORS Support**: Configurable cross-origin resource sharing
 - **Request Validation**: Enhanced Pydantic models for request/response validation
 - **Error Handling**: Custom exception handlers with proper status codes
@@ -26,6 +28,7 @@ This repository uses local CSV files stored in `data/csv/` (configurable via `CS
 - **Input Sanitization**: Strict validation of dataset names to prevent path traversal
 
 ### Developer Experience
+
 - **OpenAPI Documentation**: Comprehensive API docs with examples and tags
 - **Interactive UI**: Enhanced web interface with dark/light theme
 - **Request History**: Track and replay API requests
@@ -54,8 +57,8 @@ uvicorn api.server.main:app --reload --port 8000
 
 3. **Access the API:**
 
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+- **Swagger UI**: <http://localhost:8000/docs>
+- **ReDoc**: <http://localhost:8000/redoc>
 - **Interactive UI**: Open `index.html` in a browser
 
 ### Docker Deployment
@@ -188,6 +191,7 @@ fast-ass-api/
 ## Dataset Name Rules
 
 For security, dataset names must only contain:
+
 - Letters (a-z, A-Z)
 - Numbers (0-9)
 - Underscore (_)

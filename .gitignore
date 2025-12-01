@@ -62,6 +62,11 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+# macOS resource fork files
+._*
+.DS_Store?
+.Spotlight-V100
+.Trashes
 
 # Docker
 *.tmp
