@@ -8,11 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Initial release with comprehensive features
 
 ## [2.0.0] - 2025-11-29
 
 ### Added
+
 - CORS middleware with configurable origins
 - Request validation with enhanced Pydantic models
 - Custom exception handlers with proper status codes
@@ -35,11 +37,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rich data examples (7 new datasets)
 
 ### Changed
+
 - Improved error messages with actionable suggestions
 - Better response pagination with first/last/next/prev links
 - Enhanced dataset examples with more fields and realistic data
 
 ### Fixed
+
 - Dataset name validation to prevent path traversal
 - Date filtering timezone handling
 - CSV import/export encoding issues
@@ -47,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.0] - Previous Version
 
 ### Added
+
 - Basic CRUD operations
 - CSV import/export
 - Search and pagination
@@ -55,4 +60,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 *This changelog is automatically updated on each push to the main branch.*
-
