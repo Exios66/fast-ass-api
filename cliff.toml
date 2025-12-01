@@ -1,0 +1,49 @@
+# git-cliff configuration
+# See https://git-cliff.org/docs/configuration
+
+[changelog]
+header = "# Changelog\n\nAll notable changes to this project will be documented in this file.\n\nThe format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),\nand this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).\n"
+body = """
+{% if version %}\
+    ## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}\
+    ## [Unreleased]
+{% endif %}\
+{% for group, commits in commits | group_by(attribute="group") %}
+    ### {{ group | upper_first }}
+    {% for commit in commits %}
+    - {% if commit.breaking %}\[**breaking**\] {% endif %}{{ commit.message | upper_first }}{% if commit.links %} ({{ commit.links | join(sep=", ") }}){% endif %}
+    {% endfor %}
+{% endfor %}\
+"""
+footer = "\n---\n\n*This changelog is automatically updated on each push to the main branch.*\n"
+trim = true
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+split_commits = true
+commit_parsers = [
+    { message = "^feat", group = "Added" },
+    { message = "^fix", group = "Fixed" },
+    { message = "^docs", group = "Documentation" },
+    { message = "^style", group = "Changed" },
+    { message = "^refactor", group = "Changed" },
+    { message = "^perf", group = "Changed" },
+    { message = "^test", group = "Changed" },
+    { message = "^build", group = "Changed" },
+    { message = "^ci", group = "Changed" },
+    { message = "^chore", group = "Changed" },
+    { message = "^revert", group = "Fixed" },
+]
+link_parsers = [
+    { pattern = "\\[#(\\d+)\\]", href = "https://github.com/$OWNER/$REPO/issues/$1" },
+    { pattern = "#(\\d+)", href = "https://github.com/$OWNER/$REPO/issues/$1" },
+    { pattern = "\\[([a-f0-9]{7})\\]", href = "https://github.com/$OWNER/$REPO/commit/$1" },
+]
+filter_commits = false
+
+[tag]
+pattern = "v[0-9]+\\.[0-9]+\\.[0-9]+"
+sort = "semver"
+

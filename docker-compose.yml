@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: fast-ass-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./data/csv:/app/data/csv
+      - ./data/metadata:/app/data/metadata
+    environment:
+      - CSV_DATA_DIR=/app/data/csv
+      - CORS_ORIGINS=*
+      - LOG_LEVEL=INFO
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
