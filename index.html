@@ -504,6 +504,7 @@
         <button class="tab" data-tab="crud">CRUD Operations</button>
         <button class="tab" data-tab="bulk">Bulk Operations</button>
         <button class="tab" data-tab="export">Export & Import</button>
+        <button class="tab" data-tab="tokenizer">LLM Tokenizer</button>
         <button class="tab" data-tab="docs">API Docs</button>
         <button class="tab" data-tab="history">History</button>
       </div>
@@ -677,6 +678,82 @@
         <div class="card" style="margin-top: 16px;">
           <h3 style="margin-top: 0;">FAQ</h3>
           <div id="faq" class="muted"></div>
+        </div>
+      </div>
+
+      <!-- Tokenizer Tab -->
+      <div class="tab-content" id="tab-tokenizer">
+        <div class="card">
+          <h3 style="margin-top: 0;">🔤 LLM Tokenizer</h3>
+          <p class="muted" style="margin-bottom: 16px;">
+            Understand how LLMs break down natural language into tokens. This tool helps you understand token context windows and optimize your prompts.
+          </p>
+          
+          <div class="row" style="margin-bottom: 16px;">
+            <div style="flex: 1;">
+              <label class="muted">Select Model</label>
+              <select id="tokenizer-model">
+                <option value="gpt-4">GPT-4 (8,192 tokens)</option>
+                <option value="gpt-4-turbo">GPT-4 Turbo (128,000 tokens)</option>
+                <option value="gpt-3.5-turbo">GPT-3.5 Turbo (4,096 tokens)</option>
+                <option value="gpt-3.5-turbo-16k">GPT-3.5 Turbo 16k (16,384 tokens)</option>
+                <option value="text-davinci-003">Text Davinci 003 (4,097 tokens)</option>
+                <option value="cl100k_base">cl100k_base (8,192 tokens)</option>
+                <option value="p50k_base">p50k_base (2,048 tokens)</option>
+                <option value="r50k_base">r50k_base (2,048 tokens)</option>
+              </select>
+            </div>
+            <div style="width: 150px;">
+              <label class="muted">&nbsp;</label>
+              <button id="btn-tokenize" class="small" style="width: 100%;">Tokenize</button>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 16px;">
+            <label class="muted">Input Text</label>
+            <textarea id="tokenizer-input" class="json-edit" style="min-height: 200px; font-family: inherit;" placeholder="Enter text to tokenize...&#10;&#10;Example:&#10;Hello! How are you today? This is a test of the tokenizer system."></textarea>
+            <div class="flex" style="margin-top: 8px;">
+              <button id="btn-clear-tokenizer" class="small ghost">Clear</button>
+              <button id="btn-load-example" class="small ghost">Load Example</button>
+              <button id="btn-copy-tokens" class="small ghost">Copy Tokens</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 16px;">
+          <h3 style="margin-top: 0;">Token Statistics</h3>
+          <div id="token-stats" class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px;">
+            <!-- Stats will be populated here -->
+          </div>
+          
+          <div style="margin-bottom: 16px;">
+            <h4 style="margin: 0 0 8px 0;">Context Window Usage</h4>
+            <div id="context-window-bar" style="background: var(--glass); border-radius: 8px; height: 30px; position: relative; overflow: hidden; border: 1px solid var(--border);">
+              <div id="context-window-fill" style="background: linear-gradient(90deg, var(--ok), var(--warn)); height: 100%; width: 0%; transition: width 0.3s; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 12px;"></div>
+            </div>
+            <div id="context-window-info" class="muted" style="margin-top: 8px;"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 16px;">
+          <div class="flex" style="justify-content: space-between; margin-bottom: 12px;">
+            <h3 style="margin: 0;">Token Breakdown</h3>
+            <div class="flex">
+              <button id="btn-show-tokens" class="small ghost">Show Tokens</button>
+              <button id="btn-show-ids" class="small ghost">Show IDs</button>
+              <button id="btn-export-tokens" class="small ghost">Export</button>
+            </div>
+          </div>
+          <div id="token-breakdown" style="max-height: 400px; overflow: auto;">
+            <div class="muted" style="text-align: center; padding: 40px;">Enter text and click "Tokenize" to see token breakdown</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 16px;">
+          <h3 style="margin-top: 0;">Token Visualization</h3>
+          <div id="token-visualization" style="background: var(--glass); padding: 16px; border-radius: 8px; border: 1px solid var(--border); min-height: 100px; font-family: var(--mono); font-size: 13px; line-height: 1.8;">
+            <div class="muted" style="text-align: center; padding: 40px;">Token visualization will appear here</div>
+          </div>
         </div>
       </div>
 
@@ -1557,6 +1634,8 @@ fetch(\`\${base}/datasets/${name}/rows/123\`, {method: 'DELETE'})
         loadFAQ();
       } else if (btn.dataset.tab === 'history') {
         renderHistory();
+      } else if (btn.dataset.tab === 'tokenizer') {
+        loadTokenizerModels();
       }
     };
   });
@@ -1612,6 +1691,33 @@ fetch(\`\${base}/datasets/${name}/rows/123\`, {method: 'DELETE'})
     }
   };
 
+  // Tokenizer event handlers
+  document.getElementById('btn-tokenize').onclick = tokenizeText;
+  document.getElementById('btn-clear-tokenizer').onclick = () => {
+    document.getElementById('tokenizer-input').value = '';
+    tokenizerState.currentResult = null;
+    document.getElementById('token-stats').innerHTML = '';
+    document.getElementById('token-breakdown').innerHTML = '<div class="muted" style="text-align: center; padding: 40px;">Enter text and click "Tokenize" to see token breakdown</div>';
+    document.getElementById('token-visualization').innerHTML = '<div class="muted" style="text-align: center; padding: 40px;">Token visualization will appear here</div>';
+  };
+  document.getElementById('btn-load-example').onclick = loadTokenizerExample;
+  document.getElementById('btn-copy-tokens').onclick = copyTokens;
+  document.getElementById('btn-export-tokens').onclick = exportTokens;
+  document.getElementById('btn-show-tokens').onclick = () => {
+    tokenizerState.showTokens = true;
+    tokenizerState.showIds = false;
+    if (tokenizerState.currentResult) {
+      renderTokenBreakdown(tokenizerState.currentResult);
+    }
+  };
+  document.getElementById('btn-show-ids').onclick = () => {
+    tokenizerState.showIds = true;
+    if (tokenizerState.currentResult) {
+      const container = document.getElementById('token-breakdown');
+      container.innerHTML = `<pre>${JSON.stringify(tokenizerState.currentResult.token_ids, null, 2)}</pre>`;
+    }
+  };
+
   // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
@@ -1635,6 +1741,213 @@ fetch(\`\${base}/datasets/${name}/rows/123\`, {method: 'DELETE'})
   renderPresets();
   if (state.baseUrl) {
     listDatasets();
+  }
+
+  // Tokenizer functions
+  let tokenizerState = {
+    currentResult: null,
+    showTokens: true,
+    showIds: false,
+  };
+
+  async function loadTokenizerModels() {
+    try {
+      const res = await runFetch('GET', '/tokenize/models');
+      if (res.ok && res.payload.available) {
+        // Models loaded, ready to tokenize
+      } else {
+        showToast('Tokenizer service not available', 'warning');
+      }
+    } catch (e) {
+      showToast('Could not load tokenizer models', 'error');
+    }
+  }
+
+  async function tokenizeText() {
+    const text = document.getElementById('tokenizer-input').value.trim();
+    const model = document.getElementById('tokenizer-model').value;
+
+    if (!text) {
+      showToast('Enter text to tokenize', 'warning');
+      return;
+    }
+
+    try {
+      setStatus('tokenizing...', '');
+      const res = await runFetch('POST', '/tokenize', {
+        json: { text, model }
+      });
+
+      if (res.ok) {
+        tokenizerState.currentResult = res.payload;
+        renderTokenStats(res.payload);
+        renderTokenBreakdown(res.payload);
+        renderTokenVisualization(res.payload);
+        setStatus('tokenized', 'ok');
+        showToast(`Tokenized: ${res.payload.token_count} tokens`, 'success');
+      } else {
+        showToast('Tokenization failed', 'error');
+      }
+    } catch (e) {
+      showToast('Tokenization error: ' + e.message, 'error');
+      setStatus('error', 'err');
+    }
+  }
+
+  function renderTokenStats(data) {
+    const container = document.getElementById('token-stats');
+    container.innerHTML = `
+      <div class="card" style="padding: 12px;">
+        <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Token Count</div>
+        <div style="font-size: 24px; font-weight: 600; color: var(--accent);">${data.token_count.toLocaleString()}</div>
+      </div>
+      <div class="card" style="padding: 12px;">
+        <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Character Count</div>
+        <div style="font-size: 24px; font-weight: 600;">${data.character_count.toLocaleString()}</div>
+      </div>
+      <div class="card" style="padding: 12px;">
+        <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Word Count</div>
+        <div style="font-size: 24px; font-weight: 600;">${data.word_count.toLocaleString()}</div>
+      </div>
+      <div class="card" style="padding: 12px;">
+        <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Tokens/Character</div>
+        <div style="font-size: 24px; font-weight: 600;">${data.tokens_per_character.toFixed(3)}</div>
+      </div>
+      <div class="card" style="padding: 12px;">
+        <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Tokens/Word</div>
+        <div style="font-size: 24px; font-weight: 600;">${data.tokens_per_word.toFixed(2)}</div>
+      </div>
+      <div class="card" style="padding: 12px;">
+        <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Est. Cost (USD)</div>
+        <div style="font-size: 24px; font-weight: 600; color: var(--ok);">$${data.estimated_cost_usd.toFixed(6)}</div>
+      </div>
+    `;
+
+    // Update context window bar
+    const percent = data.context_usage_percent;
+    const fill = document.getElementById('context-window-fill');
+    fill.style.width = `${Math.min(percent, 100)}%`;
+    fill.textContent = `${percent.toFixed(1)}%`;
+    
+    if (percent > 90) {
+      fill.style.background = 'linear-gradient(90deg, var(--warn), var(--err))';
+    } else if (percent > 70) {
+      fill.style.background = 'linear-gradient(90deg, var(--ok), var(--warn))';
+    } else {
+      fill.style.background = 'linear-gradient(90deg, var(--ok), #84cc16)';
+    }
+
+    const info = document.getElementById('context-window-info');
+    info.innerHTML = `
+      <strong>${data.token_count.toLocaleString()}</strong> / <strong>${data.context_window_size.toLocaleString()}</strong> tokens used
+      (${data.tokens_remaining.toLocaleString()} remaining)
+      <br>
+      <span class="muted">Model: ${data.model} | Encoding: ${data.encoding}</span>
+    `;
+  }
+
+  function renderTokenBreakdown(data) {
+    const container = document.getElementById('token-breakdown');
+    
+    if (!data.tokens || data.tokens.length === 0) {
+      container.innerHTML = '<div class="muted" style="text-align: center; padding: 40px;">No tokens to display</div>';
+      return;
+    }
+
+    // Show first 100 tokens in table, rest in summary
+    const displayTokens = data.tokens.slice(0, 100);
+    const remaining = data.tokens.length - 100;
+
+    let html = `
+      <table>
+        <thead>
+          <tr>
+            <th>Index</th>
+            <th>Token ID</th>
+            <th>Token String</th>
+            <th>Bytes</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    displayTokens.forEach(token => {
+      const tokenStr = escapeHtml(token.token_string);
+      html += `
+        <tr>
+          <td>${token.index}</td>
+          <td><code>${token.token_id}</code></td>
+          <td><code style="background: var(--glass); padding: 2px 6px; border-radius: 4px;">${tokenStr}</code></td>
+          <td>${token.byte_length}</td>
+        </tr>
+      `;
+    });
+
+    html += '</tbody></table>';
+
+    if (remaining > 0) {
+      html += `<div class="muted" style="margin-top: 12px; text-align: center;">... and ${remaining.toLocaleString()} more tokens</div>`;
+    }
+
+    container.innerHTML = html;
+  }
+
+  function renderTokenVisualization(data) {
+    const container = document.getElementById('token-visualization');
+    
+    if (!data.tokens || data.tokens.length === 0) {
+      container.innerHTML = '<div class="muted" style="text-align: center; padding: 40px;">No tokens to visualize</div>';
+      return;
+    }
+
+    // Create visual representation with color-coded tokens
+    let html = '';
+    const colors = ['#7c3aed', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6'];
+    
+    data.tokens.forEach((token, i) => {
+      const color = colors[i % colors.length];
+      const tokenStr = escapeHtml(token.token_string);
+      html += `<span style="background: ${color}20; color: ${color}; padding: 2px 4px; margin: 2px; border-radius: 4px; border: 1px solid ${color}40; display: inline-block;" title="ID: ${token.token_id}, Index: ${token.index}">${tokenStr}</span>`;
+    });
+
+    container.innerHTML = html || '<div class="muted">No visualization available</div>';
+  }
+
+  function loadTokenizerExample() {
+    const examples = [
+      "Hello! How are you today? This is a test of the tokenizer system.",
+      "The quick brown fox jumps over the lazy dog. This sentence contains every letter of the alphabet.",
+      "Tokenization is the process of breaking down text into smaller units called tokens. These tokens are then used by language models to understand and generate text.",
+      "In natural language processing, tokenization is a crucial step. It helps models understand context, manage memory, and process information efficiently.",
+    ];
+    const randomExample = examples[Math.floor(Math.random() * examples.length)];
+    document.getElementById('tokenizer-input').value = randomExample;
+  }
+
+  function copyTokens() {
+    if (!tokenizerState.currentResult) {
+      showToast('No tokens to copy', 'warning');
+      return;
+    }
+    const data = JSON.stringify(tokenizerState.currentResult, null, 2);
+    navigator.clipboard.writeText(data);
+    showToast('Tokens copied to clipboard', 'success');
+  }
+
+  function exportTokens() {
+    if (!tokenizerState.currentResult) {
+      showToast('No tokens to export', 'warning');
+      return;
+    }
+    const data = JSON.stringify(tokenizerState.currentResult, null, 2);
+    const blob = new Blob([data], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tokens-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Tokens exported', 'success');
   }
 
   // Utility

@@ -133,6 +133,10 @@ app = FastAPI(
             "name": "export",
             "description": "Export datasets in various formats",
         },
+        {
+            "name": "tokenizer",
+            "description": "LLM tokenization and token analysis",
+        },
     ],
 )
 
@@ -1135,3 +1139,175 @@ async def import_dataset(
         merged = normalized_existing + normalized_imported
         write_csv_atomic(path, unified_headers, merged)
         return {"status": "appended", "imported": len(imported_rows), "total": len(merged)}
+
+# Tokenizer endpoints
+try:
+    import tiktoken
+    TIKTOKEN_AVAILABLE = True
+except ImportError:
+    TIKTOKEN_AVAILABLE = False
+
+class TokenizeRequest(BaseModel):
+    """Request model for tokenization."""
+    text: str = Field(..., description="Text to tokenize", min_length=1)
+    model: str = Field(
+        "gpt-4",
+        description="Model to use for tokenization",
+        regex="^(gpt-4|gpt-4-turbo|gpt-3.5-turbo|gpt-3.5-turbo-16k|text-davinci-003|text-davinci-002|text-curie-001|text-babbage-001|text-ada-001|cl100k_base|p50k_base|p50k_edit|r50k_base)$"
+    )
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "text": "Hello, how are you today?",
+                "model": "gpt-4"
+            }
+        }
+
+# Model context window sizes (approximate)
+MODEL_CONTEXT_WINDOWS = {
+    "gpt-4": 8192,
+    "gpt-4-turbo": 128000,
+    "gpt-3.5-turbo": 4096,
+    "gpt-3.5-turbo-16k": 16384,
+    "text-davinci-003": 4097,
+    "text-davinci-002": 4097,
+    "text-curie-001": 2049,
+    "text-babbage-001": 2049,
+    "text-ada-001": 2049,
+    "cl100k_base": 8192,
+    "p50k_base": 2048,
+    "p50k_edit": 2048,
+    "r50k_base": 2048,
+}
+
+# Model to encoding mapping
+MODEL_ENCODINGS = {
+    "gpt-4": "cl100k_base",
+    "gpt-4-turbo": "cl100k_base",
+    "gpt-3.5-turbo": "cl100k_base",
+    "gpt-3.5-turbo-16k": "cl100k_base",
+    "text-davinci-003": "p50k_base",
+    "text-davinci-002": "p50k_base",
+    "text-curie-001": "r50k_base",
+    "text-babbage-001": "r50k_base",
+    "text-ada-001": "r50k_base",
+    "cl100k_base": "cl100k_base",
+    "p50k_base": "p50k_base",
+    "p50k_edit": "p50k_edit",
+    "r50k_base": "r50k_base",
+}
+
+def get_encoding_for_model(model: str) -> str:
+    """Get the encoding name for a model."""
+    return MODEL_ENCODINGS.get(model, "cl100k_base")
+
+@app.post("/tokenize", tags=["tokenizer"], summary="Tokenize text using LLM tokenizer")
+@limiter.limit("200/minute")
+async def tokenize_text(
+    request: Request,
+    payload: TokenizeRequest = Body(..., description="Text and model to tokenize with")
+):
+    """
+    Tokenize text using the specified LLM tokenizer.
+    
+    Returns detailed tokenization information including:
+    - Token IDs
+    - Token strings
+    - Token count
+    - Context window information
+    - Token breakdown by character/word
+    """
+    _metrics["requests_total"] += 1
+    _metrics["requests_by_method"]["POST"] += 1
+    
+    if not TIKTOKEN_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Tokenization service unavailable: tiktoken not installed"
+        )
+    
+    try:
+        encoding_name = get_encoding_for_model(payload.model)
+        encoding = tiktoken.get_encoding(encoding_name)
+        
+        # Tokenize the text
+        tokens = encoding.encode(payload.text)
+        token_strings = [encoding.decode_single_token_bytes(token).decode('utf-8', errors='replace') for token in tokens]
+        
+        # Get context window size
+        context_window = MODEL_CONTEXT_WINDOWS.get(payload.model, 8192)
+        
+        # Calculate statistics
+        token_count = len(tokens)
+        char_count = len(payload.text)
+        word_count = len(payload.text.split())
+        tokens_per_char = token_count / char_count if char_count > 0 else 0
+        tokens_per_word = token_count / word_count if word_count > 0 else 0
+        context_usage_percent = (token_count / context_window * 100) if context_window > 0 else 0
+        
+        # Create token breakdown
+        token_breakdown = []
+        for i, (token_id, token_str) in enumerate(zip(tokens, token_strings)):
+            token_breakdown.append({
+                "index": i,
+                "token_id": token_id,
+                "token_string": token_str,
+                "byte_length": len(token_str.encode('utf-8'))
+            })
+        
+        # Estimate cost (rough estimates for GPT-4)
+        estimated_cost_per_1k_tokens = {
+            "gpt-4": 0.03,  # $0.03 per 1K input tokens
+            "gpt-4-turbo": 0.01,
+            "gpt-3.5-turbo": 0.0015,
+        }
+        cost_per_1k = estimated_cost_per_1k_tokens.get(payload.model, 0.01)
+        estimated_cost = (token_count / 1000) * cost_per_1k
+        
+        return {
+            "text": payload.text,
+            "model": payload.model,
+            "encoding": encoding_name,
+            "token_count": token_count,
+            "character_count": char_count,
+            "word_count": word_count,
+            "tokens_per_character": round(tokens_per_char, 4),
+            "tokens_per_word": round(tokens_per_word, 4),
+            "context_window_size": context_window,
+            "context_usage_percent": round(context_usage_percent, 2),
+            "tokens_remaining": max(0, context_window - token_count),
+            "estimated_cost_usd": round(estimated_cost, 6),
+            "tokens": token_breakdown,
+            "token_ids": tokens,
+        }
+    except Exception as e:
+        logger.error(f"Tokenization error: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Tokenization failed: {str(e)}"
+        )
+
+@app.get("/tokenize/models", tags=["tokenizer"], summary="List available tokenization models")
+@limiter.limit("100/minute")
+async def list_tokenizer_models(request: Request):
+    """
+    List all available tokenization models with their context window sizes.
+    """
+    _metrics["requests_total"] += 1
+    _metrics["requests_by_method"]["GET"] += 1
+    
+    models = []
+    for model, context_window in MODEL_CONTEXT_WINDOWS.items():
+        encoding = MODEL_ENCODINGS.get(model, "unknown")
+        models.append({
+            "model": model,
+            "encoding": encoding,
+            "context_window": context_window,
+            "description": f"{model} model with {context_window:,} token context window"
+        })
+    
+    return {
+        "models": models,
+        "available": TIKTOKEN_AVAILABLE
+    }
