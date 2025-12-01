@@ -1269,6 +1269,39 @@
     return toast;
   }
 
+  // Enhanced error message formatter
+  function formatError(error) {
+    if (!error) return 'Unknown error occurred';
+    
+    // Check if it's an enhanced error with details
+    if (error.details && error.details.message) {
+      let message = error.details.message;
+      if (error.details.suggestions && error.details.suggestions.length > 0) {
+        message += ' (See console for suggestions)';
+        console.error('Error details:', error.details);
+        console.error('Suggestions:', error.details.suggestions);
+      }
+      return message;
+    }
+    
+    // Handle standard Error objects
+    if (error.message) {
+      // Provide more helpful messages for common errors
+      if (error.message.includes('Failed to fetch')) {
+        return 'Failed to connect to API server. Check if server is running and URL is correct.';
+      }
+      if (error.message.includes('CORS')) {
+        return 'CORS error: Server must allow requests from this origin.';
+      }
+      if (error.message.includes('NetworkError')) {
+        return 'Network error: Check your connection and server accessibility.';
+      }
+      return error.message;
+    }
+    
+    return String(error);
+  }
+
   // Set status
   function setStatus(text, type = 'idle') {
     const el = document.getElementById('live-status');
@@ -1353,9 +1386,57 @@
       return {ok: resp.ok, status: resp.status, payload, resp, timing};
     } catch (err) {
       timing.end = performance.now() - timing.start;
-      showRaw('raw-response', String(err));
       updateConnectionQuality(null);
-      throw err;
+      
+      // Enhanced error handling with detailed messages
+      let errorMessage = err.message || String(err);
+      let errorDetails = {
+        type: 'NetworkError',
+        message: errorMessage,
+        url: url,
+        method: method,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Detect specific error types
+      if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
+        errorDetails.type = 'FetchError';
+        errorDetails.message = 'Failed to connect to the API server';
+        errorDetails.suggestions = [
+          'Check if the API server is running',
+          'Verify the API base URL is correct',
+          'Check for CORS issues (server must allow your origin)',
+          'Ensure the URL uses http:// or https:// protocol',
+          'Check your network connection'
+        ];
+      } else if (err.name === 'TypeError' && err.message.includes('NetworkError')) {
+        errorDetails.type = 'NetworkError';
+        errorDetails.message = 'Network request failed';
+        errorDetails.suggestions = [
+          'Check your internet connection',
+          'Verify the server is accessible',
+          'Check firewall settings'
+        ];
+      } else if (err.message && err.message.includes('CORS')) {
+        errorDetails.type = 'CORSError';
+        errorDetails.message = 'CORS (Cross-Origin Resource Sharing) error';
+        errorDetails.suggestions = [
+          'The API server must include your origin in CORS allowed origins',
+          'Check server CORS configuration',
+          'For development, the server may need to allow all origins (*)'
+        ];
+      }
+      
+      showRaw('raw-response', {
+        error: errorDetails,
+        originalError: errorMessage
+      });
+      
+      // Create enhanced error object
+      const enhancedError = new Error(errorDetails.message);
+      enhancedError.details = errorDetails;
+      enhancedError.originalError = err;
+      throw enhancedError;
     }
   }
 
@@ -1417,8 +1498,12 @@
       }
     } catch (e) {
       setStatus('error', 'err');
-      showToast('Network error: ' + e.message, 'error');
-      console.error(e);
+      const errorMsg = formatError(e);
+      showToast(errorMsg, 'error', 5000);
+      console.error('Error loading datasets:', e);
+      if (e.details) {
+        console.error('Error details:', e.details);
+      }
     }
   }
 
@@ -1614,8 +1699,10 @@
         showToast(`Query failed: ${res.status}`, 'error');
       }
     } catch (e) {
-      showToast('Query error: ' + e.message, 'error');
-      console.error(e);
+      const errorMsg = formatError(e);
+      showToast(errorMsg, 'error', 5000);
+      console.error('Query error:', e);
+      if (e.details) console.error('Error details:', e.details);
     }
   }
 
@@ -1688,7 +1775,9 @@
         showToast('Create failed: ' + JSON.stringify(res.payload), 'error');
       }
     } catch (e) {
-      showToast('Create error: ' + e.message, 'error');
+      const errorMsg = formatError(e);
+      showToast(errorMsg, 'error', 5000);
+      console.error('Create error:', e);
     }
   }
 
@@ -1736,7 +1825,9 @@
         showToast('Delete failed', 'error');
       }
     } catch (e) {
-      showToast('Delete error: ' + e.message, 'error');
+      const errorMsg = formatError(e);
+      showToast(errorMsg, 'error', 5000);
+      console.error('Delete error:', e);
     }
   }
 
@@ -2099,8 +2190,22 @@
         renderEndpointExplorer(docs);
       }
     } catch (e) {
-      document.getElementById('api-docs').innerHTML = '<div class="muted">Could not load API docs. Make sure the API server is running.</div>';
-      document.getElementById('endpoint-explorer').innerHTML = '<div class="muted">Could not load endpoint explorer.</div>';
+      const errorMsg = formatError(e);
+      document.getElementById('api-docs').innerHTML = `
+        <div class="muted">
+          <p><strong>Could not load API docs</strong></p>
+          <p>${errorMsg}</p>
+          <p style="margin-top: 12px; font-size: 12px;">
+            <strong>Common issues:</strong><br>
+            • API server is not running<br>
+            • Incorrect API base URL<br>
+            • CORS configuration issue<br>
+            • Network connectivity problem
+          </p>
+        </div>
+      `;
+      console.error('API docs load error:', e);
+      if (e.details) console.error('Error details:', e.details);
     }
   }
 
@@ -2490,7 +2595,12 @@ echo $response;
         listDatasets();
       }
     } catch (e) {
-      showToast('Connection failed: ' + e.message, 'error');
+      const errorMsg = formatError(e);
+      showToast(errorMsg, 'error', 5000);
+      console.error('Connection test failed:', e);
+      if (e.details) {
+        console.error('Troubleshooting suggestions:', e.details.suggestions);
+      }
     }
   };
   document.getElementById('btn-refresh').onclick = listDatasets;
@@ -2592,6 +2702,10 @@ echo $response;
     startHealthMonitoring();
   }
   
+  // Initialize tokenizer with fallback models and examples
+  loadFallbackModels();
+  loadFallbackOfflineExamples();
+  
   // Load offline examples on tokenizer tab
   document.getElementById('offline-examples-select').onchange = loadOfflineExample;
   
@@ -2658,20 +2772,30 @@ echo $response;
   };
 
   async function loadTokenizerModels() {
+    if (!state.baseUrl) {
+      // No API URL set, use fallback models
+      loadFallbackModels();
+      return;
+    }
+
     try {
       const res = await runFetch('GET', '/tokenize/models');
-      if (res.ok && res.payload.available) {
+      if (res.ok && res.payload && res.payload.available) {
         state.tokenizerModels = res.payload.models || [];
-        renderTokenizerModels(state.tokenizerModels);
-        updateModelSelector(state.tokenizerModels);
-        showToast('Models loaded', 'success');
+        if (state.tokenizerModels.length > 0) {
+          renderTokenizerModels(state.tokenizerModels);
+          updateModelSelector(state.tokenizerModels);
+          showToast('Models loaded', 'success');
+        } else {
+          loadFallbackModels();
+        }
       } else {
-        showToast('Tokenizer service not available', 'warning');
-        // Load fallback models
+        showToast('Tokenizer service not available, using fallback models', 'warning');
         loadFallbackModels();
       }
     } catch (e) {
-      showToast('Could not load tokenizer models, using fallback', 'warning');
+      console.warn('Could not load tokenizer models from API:', e);
+      showToast('Using fallback models (API unavailable)', 'info');
       loadFallbackModels();
     }
   }
@@ -2717,35 +2841,67 @@ echo $response;
       {model: 'gpt-4-turbo', encoding: 'cl100k_base', context_window: 128000},
       {model: 'gpt-3.5-turbo', encoding: 'cl100k_base', context_window: 4096},
       {model: 'gpt-3.5-turbo-16k', encoding: 'cl100k_base', context_window: 16384},
+      {model: 'text-davinci-003', encoding: 'p50k_base', context_window: 4097},
+      {model: 'cl100k_base', encoding: 'cl100k_base', context_window: 8192},
+      {model: 'p50k_base', encoding: 'p50k_base', context_window: 2048},
+      {model: 'r50k_base', encoding: 'r50k_base', context_window: 2048},
     ];
     state.tokenizerModels = fallbackModels;
     renderTokenizerModels(fallbackModels);
+    updateModelSelector(fallbackModels);
   }
 
   // Offline tokenizer examples
   async function loadOfflineExamples() {
+    if (!state.baseUrl) {
+      // No API URL, use fallback examples
+      loadFallbackOfflineExamples();
+      return;
+    }
+
     try {
       const name = 'tokenizer_examples';
       const res = await runFetch('GET', `/datasets/${encodeURIComponent(name)}/rows?limit=100`);
-      if (res.ok && res.payload.rows) {
+      if (res.ok && res.payload && res.payload.rows && res.payload.rows.length > 0) {
         state.offlineExamples = res.payload.rows;
         renderOfflineExamples(res.payload.rows);
       } else {
-        // Create fallback examples
-        state.offlineExamples = [
-          {question: 'What is AI?', response: 'Artificial intelligence is...', model: 'gpt-4', token_count: 45},
-          {question: 'How does ML work?', response: 'Machine learning is...', model: 'gpt-4', token_count: 52},
-        ];
-        renderOfflineExamples(state.offlineExamples);
+        loadFallbackOfflineExamples();
       }
     } catch (e) {
-      // Use fallback examples
-      state.offlineExamples = [
-        {question: 'What is AI?', response: 'Artificial intelligence is the simulation of human intelligence in machines.', model: 'gpt-4', token_count: 45},
-        {question: 'How does ML work?', response: 'Machine learning enables systems to learn from experience without explicit programming.', model: 'gpt-4', token_count: 52},
-      ];
-      renderOfflineExamples(state.offlineExamples);
+      console.warn('Could not load offline examples from API:', e);
+      loadFallbackOfflineExamples();
     }
+  }
+
+  function loadFallbackOfflineExamples() {
+    state.offlineExamples = [
+      {
+        question: 'What is artificial intelligence?',
+        response: 'Artificial intelligence (AI) is the simulation of human intelligence in machines that are programmed to think and learn like humans. It encompasses machine learning, natural language processing, computer vision, and robotics.',
+        model: 'gpt-4',
+        token_count: 45
+      },
+      {
+        question: 'How does machine learning work?',
+        response: 'Machine learning enables systems to learn from experience without explicit programming. It uses algorithms to analyze data, identify patterns, and make decisions or predictions based on that analysis.',
+        model: 'gpt-4',
+        token_count: 52
+      },
+      {
+        question: 'What is tokenization in NLP?',
+        response: 'Tokenization is the process of breaking down text into smaller units called tokens. These tokens are then used by language models to understand and generate text. Tokenization helps models manage context windows and process information efficiently.',
+        model: 'gpt-4',
+        token_count: 58
+      },
+      {
+        question: 'Explain transformer architecture',
+        response: 'Transformer architecture is a deep learning model that uses self-attention mechanisms to process sequences of data. It revolutionized NLP by enabling parallel processing and better understanding of long-range dependencies in text.',
+        model: 'gpt-4',
+        token_count: 48
+      }
+    ];
+    renderOfflineExamples(state.offlineExamples);
   }
 
   function renderOfflineExamples(examples) {
@@ -2783,13 +2939,19 @@ echo $response;
       return;
     }
 
+    if (!state.baseUrl) {
+      showToast('Please set API base URL first', 'warning');
+      document.getElementById('api-base-url').focus();
+      return;
+    }
+
     try {
       setStatus('tokenizing...', '');
       const res = await runFetch('POST', '/tokenize', {
         json: { text, model }
       });
 
-      if (res.ok) {
+      if (res.ok && res.payload) {
         tokenizerState.currentResult = res.payload;
         renderTokenStats(res.payload);
         renderTokenBreakdown(res.payload);
@@ -2797,64 +2959,115 @@ echo $response;
         setStatus('tokenized', 'ok');
         showToast(`Tokenized: ${res.payload.token_count} tokens`, 'success');
       } else {
-        showToast('Tokenization failed', 'error');
+        const errorMsg = res.payload?.detail || res.payload?.error || 'Tokenization failed';
+        showToast(`Tokenization failed: ${errorMsg}`, 'error');
+        setStatus('error', 'err');
       }
     } catch (e) {
-      showToast('Tokenization error: ' + e.message, 'error');
+      const errorMsg = formatError(e);
+      showToast(errorMsg, 'error', 5000);
       setStatus('error', 'err');
+      console.error('Tokenization error:', e);
+      if (e.details) {
+        console.error('Error details:', e.details);
+        console.error('Troubleshooting:', e.details.suggestions);
+      }
+      
+      // Show helpful message in the UI
+      const container = document.getElementById('token-stats');
+      if (container) {
+        container.innerHTML = `
+          <div class="card" style="padding: 16px; border: 1px solid var(--err);">
+            <div style="color: var(--err); font-weight: 600; margin-bottom: 8px;">⚠️ Tokenization Failed</div>
+            <div class="muted" style="font-size: 12px; margin-bottom: 8px;">${errorMsg}</div>
+            <div class="muted" style="font-size: 11px;">
+              <strong>Possible solutions:</strong><br>
+              • Check if API server is running<br>
+              • Verify API base URL is correct<br>
+              • Ensure /tokenize endpoint is available<br>
+              • Check browser console for details
+            </div>
+          </div>
+        `;
+      }
     }
   }
 
   function renderTokenStats(data) {
+    if (!data) {
+      console.error('No token data provided to renderTokenStats');
+      return;
+    }
+
     const container = document.getElementById('token-stats');
+    if (!container) {
+      console.error('token-stats container not found');
+      return;
+    }
+
+    // Safely access properties with defaults
+    const tokenCount = data.token_count || 0;
+    const charCount = data.character_count || 0;
+    const wordCount = data.word_count || 0;
+    const tokensPerChar = data.tokens_per_character || (tokenCount > 0 && charCount > 0 ? tokenCount / charCount : 0);
+    const tokensPerWord = data.tokens_per_word || (tokenCount > 0 && wordCount > 0 ? tokenCount / wordCount : 0);
+    const estimatedCost = data.estimated_cost_usd || 0;
+
     container.innerHTML = `
       <div class="card" style="padding: 12px;">
         <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Token Count</div>
-        <div style="font-size: 24px; font-weight: 600; color: var(--accent);">${data.token_count.toLocaleString()}</div>
+        <div style="font-size: 24px; font-weight: 600; color: var(--accent);">${tokenCount.toLocaleString()}</div>
       </div>
       <div class="card" style="padding: 12px;">
         <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Character Count</div>
-        <div style="font-size: 24px; font-weight: 600;">${data.character_count.toLocaleString()}</div>
+        <div style="font-size: 24px; font-weight: 600;">${charCount.toLocaleString()}</div>
       </div>
       <div class="card" style="padding: 12px;">
         <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Word Count</div>
-        <div style="font-size: 24px; font-weight: 600;">${data.word_count.toLocaleString()}</div>
+        <div style="font-size: 24px; font-weight: 600;">${wordCount.toLocaleString()}</div>
       </div>
       <div class="card" style="padding: 12px;">
         <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Tokens/Character</div>
-        <div style="font-size: 24px; font-weight: 600;">${data.tokens_per_character.toFixed(3)}</div>
+        <div style="font-size: 24px; font-weight: 600;">${tokensPerChar.toFixed(3)}</div>
       </div>
       <div class="card" style="padding: 12px;">
         <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Tokens/Word</div>
-        <div style="font-size: 24px; font-weight: 600;">${data.tokens_per_word.toFixed(2)}</div>
+        <div style="font-size: 24px; font-weight: 600;">${tokensPerWord.toFixed(2)}</div>
       </div>
       <div class="card" style="padding: 12px;">
         <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Est. Cost (USD)</div>
-        <div style="font-size: 24px; font-weight: 600; color: var(--ok);">$${data.estimated_cost_usd.toFixed(6)}</div>
+        <div style="font-size: 24px; font-weight: 600; color: var(--ok);">$${estimatedCost.toFixed(6)}</div>
       </div>
     `;
 
     // Update context window bar
-    const percent = data.context_usage_percent;
+    const percent = data.context_usage_percent || 0;
+    const contextWindow = data.context_window_size || 8192;
+    const tokensRemaining = data.tokens_remaining || Math.max(0, contextWindow - tokenCount);
     const fill = document.getElementById('context-window-fill');
-    fill.style.width = `${Math.min(percent, 100)}%`;
-    fill.textContent = `${percent.toFixed(1)}%`;
-    
-    if (percent > 90) {
-      fill.style.background = 'linear-gradient(90deg, var(--warn), var(--err))';
-    } else if (percent > 70) {
-      fill.style.background = 'linear-gradient(90deg, var(--ok), var(--warn))';
-    } else {
-      fill.style.background = 'linear-gradient(90deg, var(--ok), #84cc16)';
+    const info = document.getElementById('context-window-info');
+
+    if (fill) {
+      fill.style.width = `${Math.min(percent, 100)}%`;
+      fill.textContent = `${percent.toFixed(1)}%`;
+      
+      if (percent > 90) {
+        fill.style.background = 'linear-gradient(90deg, var(--warn), var(--err))';
+      } else if (percent > 70) {
+        fill.style.background = 'linear-gradient(90deg, var(--ok), var(--warn))';
+      } else {
+        fill.style.background = 'linear-gradient(90deg, var(--ok), #84cc16)';
+      }
     }
 
-    const info = document.getElementById('context-window-info');
-    info.innerHTML = `
-      <strong>${data.token_count.toLocaleString()}</strong> / <strong>${data.context_window_size.toLocaleString()}</strong> tokens used
-      (${data.tokens_remaining.toLocaleString()} remaining)
-      <br>
-      <span class="muted">Model: ${data.model} | Encoding: ${data.encoding}</span>
-    `;
+    if (info) {
+      info.innerHTML = `
+        <strong>${tokenCount.toLocaleString()}</strong> / <strong>${contextWindow.toLocaleString()}</strong> tokens used
+        (${tokensRemaining.toLocaleString()} remaining)
+        <br>
+        <span class="muted">Model: ${data.model || 'unknown'} | Encoding: ${data.encoding || 'unknown'}</span>
+      `;
+    }
   }
 
   function renderTokenBreakdown(data) {
