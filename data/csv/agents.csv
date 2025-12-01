@@ -1,0 +1,11 @@
+id,agent_name,status,last_active,score,capabilities,model_type,version,config,metrics
+1,AgentX,active,2025-11-29T21:00:00Z,95,"[""nlp"",""vision"",""code""]","gpt-4",2.1,"{""temperature"":0.7,""max_tokens"":2000}",{""requests"":15420,""success_rate"":0.98}
+2,AgentY,inactive,2025-11-25T14:15:00Z,80,"[""nlp"",""search""]","gpt-3.5",1.8,"{""temperature"":0.5,""max_tokens"":1000}",{""requests"":8230,""success_rate"":0.95}
+3,AgentZ,active,2025-11-28T10:30:00Z,87,"[""code"",""analysis""]","claude-3",2.0,"{""temperature"":0.6,""max_tokens"":1500}",{""requests"":11250,""success_rate"":0.97}
+4,AgentAlpha,active,2025-11-29T19:45:00Z,92,"[""nlp"",""vision"",""code"",""search""]","gpt-4-turbo",2.2,"{""temperature"":0.7,""max_tokens"":4000}",{""requests"":18940,""success_rate"":0.99}
+5,AgentBeta,inactive,2025-11-20T08:00:00Z,76,"[""nlp""]","gpt-3.5",1.5,"{""temperature"":0.4,""max_tokens"":800}",{""requests"":5420,""success_rate"":0.92}
+6,AgentGamma,active,2025-11-29T20:30:00Z,89,"[""code"",""nlp"",""analysis""]","claude-3-opus",2.1,"{""temperature"":0.65,""max_tokens"":2000}",{""requests"":13480,""success_rate"":0.96}
+7,AgentDelta,active,2025-11-28T16:45:00Z,84,"[""vision"",""nlp""]","gpt-4-vision",2.0,"{""temperature"":0.7,""max_tokens"":3000}",{""requests"":9870,""success_rate"":0.94}
+8,AgentEpsilon,inactive,2025-11-22T11:20:00Z,71,"[""search""]","gpt-3.5",1.2,"{""temperature"":0.3,""max_tokens"":500}",{""requests"":3210,""success_rate"":0.88}
+9,AgentZeta,active,2025-11-29T18:15:00Z,91,"[""nlp"",""code"",""vision"",""search"",""analysis""]","gpt-4-turbo",2.3,"{""temperature"":0.75,""max_tokens"":5000}",{""requests"":20150,""success_rate"":0.98}
+10,AgentTheta,active,2025-11-27T13:00:00Z,82,"[""nlp"",""code""]","claude-3-sonnet",1.9,"{""temperature"":0.6,""max_tokens"":1200}",{""requests"":7650,""success_rate"":0.93}

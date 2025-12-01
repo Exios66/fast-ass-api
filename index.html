@@ -3,191 +3,798 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>CSV API Diagnostics — Agent Endpoint Tester</title>
+<title>CSV API Diagnostics — Enhanced Agent Endpoint Tester</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  :root{
-    --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#7c3aed; --ok:#10b981; --err:#ef4444; --glass: rgba(255,255,255,0.02);
+  :root {
+    --bg: #0f1724;
+    --card: #0b1220;
+    --muted: #94a3b8;
+    --accent: #7c3aed;
+    --ok: #10b981;
+    --err: #ef4444;
+    --warn: #f59e0b;
+    --glass: rgba(255,255,255,0.02);
     --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+    --border: rgba(255,255,255,0.03);
+    --hover: rgba(255,255,255,0.05);
   }
-  html,body{height:100%;margin:0;background:linear-gradient(180deg,#071029 0%, #081426 60%);color:#e6eef8;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
-  .wrap{max-width:1100px;margin:28px auto;padding:20px;}
-  header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
-  header h1{font-size:20px;margin:0}
-  .card{background:linear-gradient(180deg,var(--card), rgba(11,18,32,0.6));border:1px solid rgba(255,255,255,0.03);padding:14px;border-radius:10px;box-shadow: 0 6px 24px rgba(2,6,23,0.6);}
-  .row{display:flex;gap:12px}
-  .col{display:flex;flex-direction:column;gap:8px}
-  input[type=text], select, textarea{background:var(--glass);border:1px solid rgba(255,255,255,0.04);color:inherit;padding:8px;border-radius:6px;font-family:inherit}
-  button{background:linear-gradient(90deg,var(--accent),#5b21b6);border:0;padding:8px 12px;border-radius:8px;color:white;cursor:pointer}
-  button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06)}
-  button.warn{background:linear-gradient(90deg,#f97316,#ef4444)}
-  .small{font-size:13px;padding:6px 8px}
-  .muted{color:var(--muted);font-size:13px}
-  .grid{display:grid;grid-template-columns:1fr 420px;gap:14px}
-  pre{background:rgba(0,0,0,0.2);padding:10px;border-radius:8px;overflow:auto;font-family:var(--mono);font-size:13px}
-  table{width:100%;border-collapse:collapse}
-  th,td{padding:6px;border-bottom:1px solid rgba(255,255,255,0.03);text-align:left;font-size:13px}
-  .pill{display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.02);font-size:12px}
-  .flex{display:flex;gap:8px;align-items:center}
-  .footer{margin-top:18px;color:var(--muted);font-size:13px}
-  .diagnostics{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .status-ok{color:var(--ok);font-weight:600}
-  .status-err{color:var(--err);font-weight:600}
-  .json-edit{width:100%;min-height:120px;resize:vertical}
-  .file-input{display:flex;gap:8px;align-items:center}
-  @media (max-width:980px){ .grid{grid-template-columns:1fr; } header{flex-direction:column;align-items:flex-start} }
+  
+  [data-theme="light"] {
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --muted: #64748b;
+    --accent: #7c3aed;
+    --ok: #10b981;
+    --err: #ef4444;
+    --warn: #f59e0b;
+    --glass: rgba(0,0,0,0.02);
+    --border: rgba(0,0,0,0.1);
+    --hover: rgba(0,0,0,0.05);
+  }
+  
+  * { box-sizing: border-box; }
+  
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: var(--bg);
+    color: var(--muted);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    transition: background 0.3s, color 0.3s;
+  }
+  
+  [data-theme="light"] html, [data-theme="light"] body {
+    background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 60%);
+  }
+  
+  .wrap {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  
+  header h1 {
+    font-size: 24px;
+    margin: 0;
+    color: var(--accent);
+  }
+  
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    transition: all 0.2s;
+  }
+  
+  .card:hover {
+    box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+  }
+  
+  .row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  input[type=text], input[type=number], select, textarea {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    color: inherit;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    transition: all 0.2s;
+    width: 100%;
+  }
+  
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  }
+  
+  button {
+    background: linear-gradient(90deg, var(--accent), #5b21b6);
+    border: 0;
+    padding: 10px 16px;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  
+  button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  }
+  
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  button.ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: inherit;
+  }
+  
+  button.ghost:hover:not(:disabled) {
+    background: var(--hover);
+  }
+  
+  button.warn {
+    background: linear-gradient(90deg, #f97316, #ef4444);
+  }
+  
+  button.small {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+  
+  .muted {
+    color: var(--muted);
+    font-size: 13px;
+  }
+  
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 16px;
+  }
+  
+  pre {
+    background: var(--glass);
+    padding: 12px;
+    border-radius: 8px;
+    overflow: auto;
+    font-family: var(--mono);
+    font-size: 12px;
+    border: 1px solid var(--border);
+    max-height: 400px;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  
+  th, td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  
+  th {
+    font-weight: 600;
+    color: var(--accent);
+    position: sticky;
+    top: 0;
+    background: var(--card);
+  }
+  
+  tr:hover {
+    background: var(--hover);
+  }
+  
+  .pill {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--glass);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .flex {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .status-ok { color: var(--ok); }
+  .status-err { color: var(--err); }
+  .status-warn { color: var(--warn); }
+  
+  .json-edit {
+    width: 100%;
+    min-height: 120px;
+    resize: vertical;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  
+  .file-input {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  /* Loading spinner */
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Toast notifications */
+  .toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .toast {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    min-width: 300px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease-out;
+  }
+  
+  .toast.success { border-left: 4px solid var(--ok); }
+  .toast.error { border-left: 4px solid var(--err); }
+  .toast.warning { border-left: 4px solid var(--warn); }
+  .toast.info { border-left: 4px solid var(--accent); }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  
+  .tab {
+    padding: 10px 16px;
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  
+  .tab-content {
+    display: none;
+  }
+  
+  .tab-content.active {
+    display: block;
+  }
+  
+  /* Theme toggle */
+  .theme-toggle {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .theme-toggle:hover {
+    background: var(--hover);
+  }
+  
+  /* Request history */
+  .history-item {
+    padding: 8px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .history-item:hover {
+    background: var(--hover);
+  }
+  
+  /* Code examples */
+  .code-block {
+    background: var(--glass);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 12px;
+    position: relative;
+  }
+  
+  .copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  
+  /* Charts */
+  .chart-container {
+    position: relative;
+    height: 300px;
+    margin: 16px 0;
+  }
+  
+  /* Connection quality indicator */
+  .connection-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+  
+  .connection-indicator.excellent { background: var(--ok); }
+  .connection-indicator.good { background: #84cc16; }
+  .connection-indicator.fair { background: var(--warn); }
+  .connection-indicator.poor { background: var(--err); }
+  
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .wrap {
+      padding: 12px;
+    }
+    
+    .card {
+      padding: 12px;
+    }
+  }
+  
+  /* Advanced filter panel */
+  .filter-panel {
+    background: var(--glass);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  
+  .filter-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr auto;
+    gap: 8px;
+    align-items: end;
+    margin-bottom: 8px;
+  }
+  
+  /* Query presets */
+  .preset-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .preset-item:hover {
+    background: var(--hover);
+  }
 </style>
 </head>
-<body>
+<body data-theme="dark">
 <div class="wrap">
   <header>
     <div>
-      <h1>CSV API Diagnostics — Agent Endpoint Tester</h1>
-      <div class="muted">Static GitHub Pages UI to interact with your Agent Data CSV API and diagnose connectivity/CORS/latency.</div>
+      <h1>📊 CSV API Diagnostics — Enhanced Agent Endpoint Tester</h1>
+      <div class="muted">Comprehensive UI to interact with your Agent Data CSV API with advanced features</div>
     </div>
-    <div style="margin-left:auto" class="muted">Status: <span id="live-status" class="pill">idle</span></div>
+    <div class="flex">
+      <button class="theme-toggle small" id="theme-toggle" title="Toggle theme">🌓</button>
+      <div class="muted">Status: <span id="live-status" class="pill">idle</span></div>
+    </div>
   </header>
+
+  <div class="toast-container" id="toast-container"></div>
 
   <div class="card grid">
     <section>
-      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div class="col" style="flex:1">
-          <label class="muted">API Base URL</label>
-          <input id="api-base" type="text" placeholder="https://api.example.com (no trailing slash)" />
-        </div>
-        <div style="width:200px" class="col">
-          <label class="muted">Actions</label>
-          <div class="flex">
-            <button id="btn-save" class="small">Save URL</button>
-            <button id="btn-test" class="small ghost">Test</button>
-            <button id="btn-refresh" class="small ghost">Refresh datasets</button>
+      <!-- API Configuration -->
+      <div class="card" style="margin-bottom: 16px;">
+        <div class="row" style="justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div class="col" style="flex: 1;">
+            <label class="muted">API Base URL</label>
+            <input id="api-base" type="text" placeholder="https://api.example.com (no trailing slash)" />
           </div>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
-        <div style="flex:1">
-          <label class="muted">Datasets</label>
-          <div id="datasets-list" class="card" style="padding:8px;max-height:240px;overflow:auto"></div>
-        </div>
-
-        <div style="width:360px">
-          <label class="muted">Diagnostics</label>
-          <div class="card" style="padding:10px">
-            <div class="diagnostics">
-              <div>Connectivity: <span id="diag-conn" class="pill">—</span></div>
-              <div>Latency: <span id="diag-latency" class="pill">—</span></div>
-              <div>HTTP: <span id="diag-http" class="pill">—</span></div>
+          <div style="width: 200px;" class="col">
+            <label class="muted">Actions</label>
+            <div class="flex">
+              <button id="btn-save" class="small">Save</button>
+              <button id="btn-test" class="small ghost">Test</button>
+              <button id="btn-refresh" class="small ghost">Refresh</button>
             </div>
-            <div style="margin-top:8px" id="diag-message" class="muted">Press <strong>Test</strong> to run quick diagnostics.</div>
-            <div style="margin-top:10px"><button id="btn-diagnose" class="small">Run full diagnosis</button></div>
+          </div>
+        </div>
+        
+        <div class="row" style="margin-top: 12px;">
+          <div style="flex: 1;">
+            <label class="muted">Datasets</label>
+            <div id="datasets-list" class="card" style="padding: 8px; max-height: 200px; overflow: auto;"></div>
+          </div>
+          
+          <div style="width: 360px;">
+            <label class="muted">Connection Diagnostics</label>
+            <div class="card" style="padding: 10px;">
+              <div class="flex" style="margin-bottom: 8px;">
+                <div><span class="connection-indicator" id="conn-indicator"></span>Quality: <span id="diag-quality" class="pill">—</span></div>
+                <div>Latency: <span id="diag-latency" class="pill">—</span></div>
+                <div>HTTP: <span id="diag-http" class="pill">—</span></div>
+              </div>
+              <div id="diag-message" class="muted" style="margin-bottom: 8px;">Press <strong>Test</strong> to run diagnostics.</div>
+              <div class="flex">
+                <button id="btn-diagnose" class="small">Full Diagnosis</button>
+                <button id="btn-health" class="small ghost">Health Check</button>
+                <button id="btn-metrics" class="small ghost">Metrics</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <hr style="border:none;height:12px" />
+      <!-- Tabs for different sections -->
+      <div class="tabs">
+        <button class="tab active" data-tab="query">Query & Browse</button>
+        <button class="tab" data-tab="crud">CRUD Operations</button>
+        <button class="tab" data-tab="bulk">Bulk Operations</button>
+        <button class="tab" data-tab="export">Export & Import</button>
+        <button class="tab" data-tab="tokenizer">LLM Tokenizer</button>
+        <button class="tab" data-tab="docs">API Docs</button>
+        <button class="tab" data-tab="history">History</button>
+      </div>
 
-      <div style="display:flex;gap:12px;flex-wrap:wrap">
-        <div style="flex:1;min-width:320px">
-          <label class="muted">Selected dataset</label>
-          <input id="selected-dataset" type="text" placeholder="Click a dataset on the left" />
-        </div>
-        <div style="width:220px">
-          <label class="muted">Query (search)</label>
-          <input id="q-search" type="text" placeholder="search text" />
-        </div>
-        <div style="width:160px">
-          <label class="muted">Limit</label>
-          <input id="q-limit" type="text" value="50" />
-        </div>
-        <div style="width:160px">
-          <label class="muted">&nbsp;</label>
-          <div class="flex">
-            <button id="btn-query" class="small">Run Query</button>
-            <button id="btn-schema" class="small ghost">Schema</button>
-            <button id="btn-export" class="small ghost">Export CSV</button>
+      <!-- Query Tab -->
+      <div class="tab-content active" id="tab-query">
+        <div class="card">
+          <div class="row" style="margin-bottom: 12px;">
+            <div style="flex: 1; min-width: 200px;">
+              <label class="muted">Selected Dataset</label>
+              <input id="selected-dataset" type="text" placeholder="Click a dataset or type name" />
+            </div>
+            <div style="width: 200px;">
+              <label class="muted">Limit</label>
+              <input id="q-limit" type="number" value="50" min="1" max="10000" />
+            </div>
+            <div style="width: 200px;">
+              <label class="muted">Offset</label>
+              <input id="q-offset" type="number" value="0" min="0" />
+            </div>
+            <div style="width: 150px;">
+              <label class="muted">&nbsp;</label>
+              <button id="btn-query" class="small" style="width: 100%;">Query</button>
+            </div>
+          </div>
+
+          <div class="row" style="margin-bottom: 12px;">
+            <div style="flex: 1;">
+              <label class="muted">Global Search</label>
+              <input id="q-search" type="text" placeholder="Search across all fields" />
+            </div>
+            <div style="width: 150px;">
+              <label class="muted">Sort By</label>
+              <input id="q-sort-by" type="text" placeholder="field name" />
+            </div>
+            <div style="width: 120px;">
+              <label class="muted">Order</label>
+              <select id="q-sort-order">
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex" style="justify-content: space-between; margin-bottom: 8px;">
+              <label class="muted">Advanced Filters</label>
+              <button id="btn-add-filter" class="small ghost">+ Add Filter</button>
+            </div>
+            <div id="filter-container"></div>
+          </div>
+
+          <div style="margin-top: 16px;">
+            <div class="flex" style="justify-content: space-between; margin-bottom: 8px;">
+              <label class="muted">Query Presets</label>
+              <button id="btn-save-preset" class="small ghost">Save Preset</button>
+            </div>
+            <div id="presets-list" class="card" style="max-height: 150px; overflow: auto;"></div>
           </div>
         </div>
+
+        <div class="card" style="margin-top: 16px;">
+          <div class="flex" style="justify-content: space-between; margin-bottom: 12px;">
+            <div>
+              <label class="muted">Results: <span id="results-count">0</span> rows</label>
+              <div id="pagination-info" class="muted" style="margin-top: 4px;"></div>
+            </div>
+            <div class="flex">
+              <button id="btn-export-json" class="small ghost">Export JSON</button>
+              <button id="btn-export-csv" class="small ghost">Export CSV</button>
+              <button id="btn-copy-results" class="small ghost">Copy</button>
+              <button id="btn-visualize" class="small ghost">Visualize</button>
+            </div>
+          </div>
+          <div id="results" style="max-height: 600px; overflow: auto;"></div>
+          <div id="chart-container" class="chart-container" style="display: none;"></div>
+        </div>
       </div>
 
-      <div style="margin-top:12px">
-        <div class="muted">Results:</div>
-        <div id="results" class="card" style="margin-top:8px;min-height:120px;padding:10px"></div>
-      </div>
-
-      <hr style="border:none;height:12px" />
-
-      <div style="display:flex;gap:12px;flex-wrap:wrap">
-        <div style="flex:1">
-          <label class="muted">Create row (JSON)</label>
-          <textarea id="create-json" class="json-edit" placeholder='{"name":"Agent","role":"assistant"}'></textarea>
-          <div style="margin-top:8px" class="flex">
+      <!-- CRUD Tab -->
+      <div class="tab-content" id="tab-crud">
+        <div class="card">
+          <h3 style="margin-top: 0;">Create Row</h3>
+          <textarea id="create-json" class="json-edit" placeholder='{"name":"Agent","role":"assistant","active":true}'></textarea>
+          <div class="flex" style="margin-top: 8px;">
             <button id="btn-create" class="small">Create</button>
             <button id="btn-clear-create" class="small ghost">Clear</button>
+            <button id="btn-template-create" class="small ghost">Load Template</button>
           </div>
         </div>
 
-        <div style="width:420px">
-          <label class="muted">Update / Delete by ID</label>
-          <input id="update-id" type="text" placeholder="row id" />
-          <textarea id="update-json" class="json-edit" placeholder='{"notes":"updated"}'></textarea>
-          <div style="margin-top:8px" class="flex">
+        <div class="card" style="margin-top: 16px;">
+          <h3 style="margin-top: 0;">Update / Delete Row</h3>
+          <input id="update-id" type="text" placeholder="Row ID" style="margin-bottom: 8px;" />
+          <textarea id="update-json" class="json-edit" placeholder='{"notes":"updated","active":false}'></textarea>
+          <div class="flex" style="margin-top: 8px;">
             <button id="btn-update" class="small">Update</button>
             <button id="btn-delete" class="small warn">Delete</button>
+            <button id="btn-schema" class="small ghost">Schema</button>
+            <button id="btn-metadata" class="small ghost">Metadata</button>
           </div>
         </div>
       </div>
 
-      <hr style="border:none;height:12px" />
+      <!-- Bulk Tab -->
+      <div class="tab-content" id="tab-bulk">
+        <div class="card">
+          <h3 style="margin-top: 0;">Bulk Create</h3>
+          <textarea id="bulk-create-json" class="json-edit" placeholder='{"rows":[{"name":"Item 1"},{"name":"Item 2"}]}'></textarea>
+          <button id="btn-bulk-create" class="small" style="margin-top: 8px;">Bulk Create</button>
+        </div>
 
-      <div>
-        <label class="muted">Bulk Import (CSV)</label>
-        <div class="card" style="padding:10px">
+        <div class="card" style="margin-top: 16px;">
+          <h3 style="margin-top: 0;">Bulk Update</h3>
+          <textarea id="bulk-update-json" class="json-edit" placeholder='{"updates":[{"id":"123","name":"Updated"}]}'></textarea>
+          <button id="btn-bulk-update" class="small" style="margin-top: 8px;">Bulk Update</button>
+        </div>
+
+        <div class="card" style="margin-top: 16px;">
+          <h3 style="margin-top: 0;">Bulk Delete</h3>
+          <textarea id="bulk-delete-json" class="json-edit" placeholder='{"ids":["123","456"]}'></textarea>
+          <button id="btn-bulk-delete" class="small warn" style="margin-top: 8px;">Bulk Delete</button>
+        </div>
+      </div>
+
+      <!-- Export Tab -->
+      <div class="tab-content" id="tab-export">
+        <div class="card">
+          <h3 style="margin-top: 0;">Import CSV</h3>
           <div class="file-input">
             <input id="csv-file" type="file" accept=".csv,text/csv" />
             <select id="import-mode">
-              <option value="append">append</option>
-              <option value="replace">replace</option>
+              <option value="append">Append</option>
+              <option value="replace">Replace</option>
             </select>
             <button id="btn-import" class="small">Import</button>
           </div>
-          <div class="muted" style="margin-top:8px">Tip: For large files ensure your API's MAX_UPLOAD_SIZE / server limits allow the upload and that CORS allows this origin.</div>
         </div>
-      </div>
 
-    </section>
-
-    <aside>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
-        <div style="flex:1">
-          <label class="muted">Raw Request</label>
-          <pre id="raw-request" style="height:140px">—</pre>
-        </div>
-        <div style="flex:1">
-          <label class="muted">Raw Response</label>
-          <pre id="raw-response" style="height:140px">—</pre>
-        </div>
-      </div>
-
-      <div style="margin-top:8px">
-        <label class="muted">Troubleshooting & Hints</label>
-        <div class="card" style="padding:10px">
-          <div id="troubleshoot" class="muted">
-            <ul>
-              <li>Common issue: CORS blocked. Add CORS to your API server for this origin or use <code>allow_origins=["*"]</code> for testing.</li>
-              <li>Check server logs for trace IDs shown in error responses.</li>
-              <li>If fetch returns a network error (TypeError), the browser likely blocked the request due to CORS or network issues.</li>
-              <li>Use the generated curl examples below to test from the server-side (no CORS).</li>
-            </ul>
-            <div style="margin-top:8px">
-              <label class="muted">Generated curl</label>
-              <pre id="curl-example">—</pre>
-            </div>
+        <div class="card" style="margin-top: 16px;">
+          <h3 style="margin-top: 0;">Export Dataset</h3>
+          <div class="flex">
+            <button id="btn-export-csv-file" class="small">Export CSV</button>
+            <button id="btn-export-json-file" class="small">Export JSON</button>
           </div>
         </div>
       </div>
 
-      <div style="margin-top:12px" class="footer">
-        <div>Built for troubleshooting agent connectivity. No secrets stored; base URL saved in your browser only.</div>
+      <!-- API Docs Tab -->
+      <div class="tab-content" id="tab-docs">
+        <div class="card">
+          <h3 style="margin-top: 0;">API Documentation</h3>
+          <div id="api-docs" style="max-height: 600px; overflow: auto;"></div>
+        </div>
+
+        <div class="card" style="margin-top: 16px;">
+          <h3 style="margin-top: 0;">Code Examples</h3>
+          <div class="tabs">
+            <button class="tab small active" data-code-tab="curl">cURL</button>
+            <button class="tab small" data-code-tab="python">Python</button>
+            <button class="tab small" data-code-tab="javascript">JavaScript</button>
+          </div>
+          <div id="code-examples"></div>
+        </div>
+
+        <div class="card" style="margin-top: 16px;">
+          <h3 style="margin-top: 0;">Quick Start Guide</h3>
+          <div id="quick-start" class="muted"></div>
+        </div>
+
+        <div class="card" style="margin-top: 16px;">
+          <h3 style="margin-top: 0;">FAQ</h3>
+          <div id="faq" class="muted"></div>
+        </div>
+      </div>
+
+      <!-- Tokenizer Tab -->
+      <div class="tab-content" id="tab-tokenizer">
+        <div class="card">
+          <h3 style="margin-top: 0;">🔤 LLM Tokenizer</h3>
+          <p class="muted" style="margin-bottom: 16px;">
+            Understand how LLMs break down natural language into tokens. This tool helps you understand token context windows and optimize your prompts.
+          </p>
+          
+          <div class="row" style="margin-bottom: 16px;">
+            <div style="flex: 1;">
+              <label class="muted">Select Model</label>
+              <select id="tokenizer-model">
+                <option value="gpt-4">GPT-4 (8,192 tokens)</option>
+                <option value="gpt-4-turbo">GPT-4 Turbo (128,000 tokens)</option>
+                <option value="gpt-3.5-turbo">GPT-3.5 Turbo (4,096 tokens)</option>
+                <option value="gpt-3.5-turbo-16k">GPT-3.5 Turbo 16k (16,384 tokens)</option>
+                <option value="text-davinci-003">Text Davinci 003 (4,097 tokens)</option>
+                <option value="cl100k_base">cl100k_base (8,192 tokens)</option>
+                <option value="p50k_base">p50k_base (2,048 tokens)</option>
+                <option value="r50k_base">r50k_base (2,048 tokens)</option>
+              </select>
+            </div>
+            <div style="width: 150px;">
+              <label class="muted">&nbsp;</label>
+              <button id="btn-tokenize" class="small" style="width: 100%;">Tokenize</button>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 16px;">
+            <label class="muted">Input Text</label>
+            <textarea id="tokenizer-input" class="json-edit" style="min-height: 200px; font-family: inherit;" placeholder="Enter text to tokenize...&#10;&#10;Example:&#10;Hello! How are you today? This is a test of the tokenizer system."></textarea>
+            <div class="flex" style="margin-top: 8px;">
+              <button id="btn-clear-tokenizer" class="small ghost">Clear</button>
+              <button id="btn-load-example" class="small ghost">Load Example</button>
+              <button id="btn-copy-tokens" class="small ghost">Copy Tokens</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 16px;">
+          <h3 style="margin-top: 0;">Token Statistics</h3>
+          <div id="token-stats" class="row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px;">
+            <!-- Stats will be populated here -->
+          </div>
+          
+          <div style="margin-bottom: 16px;">
+            <h4 style="margin: 0 0 8px 0;">Context Window Usage</h4>
+            <div id="context-window-bar" style="background: var(--glass); border-radius: 8px; height: 30px; position: relative; overflow: hidden; border: 1px solid var(--border);">
+              <div id="context-window-fill" style="background: linear-gradient(90deg, var(--ok), var(--warn)); height: 100%; width: 0%; transition: width 0.3s; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 12px;"></div>
+            </div>
+            <div id="context-window-info" class="muted" style="margin-top: 8px;"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 16px;">
+          <div class="flex" style="justify-content: space-between; margin-bottom: 12px;">
+            <h3 style="margin: 0;">Token Breakdown</h3>
+            <div class="flex">
+              <button id="btn-show-tokens" class="small ghost">Show Tokens</button>
+              <button id="btn-show-ids" class="small ghost">Show IDs</button>
+              <button id="btn-export-tokens" class="small ghost">Export</button>
+            </div>
+          </div>
+          <div id="token-breakdown" style="max-height: 400px; overflow: auto;">
+            <div class="muted" style="text-align: center; padding: 40px;">Enter text and click "Tokenize" to see token breakdown</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 16px;">
+          <h3 style="margin-top: 0;">Token Visualization</h3>
+          <div id="token-visualization" style="background: var(--glass); padding: 16px; border-radius: 8px; border: 1px solid var(--border); min-height: 100px; font-family: var(--mono); font-size: 13px; line-height: 1.8;">
+            <div class="muted" style="text-align: center; padding: 40px;">Token visualization will appear here</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Tab -->
+      <div class="tab-content" id="tab-history">
+        <div class="card">
+          <div class="flex" style="justify-content: space-between; margin-bottom: 12px;">
+            <h3 style="margin: 0;">Request History</h3>
+            <button id="btn-clear-history" class="small ghost">Clear History</button>
+          </div>
+          <div id="history-list" style="max-height: 600px; overflow: auto;"></div>
+        </div>
+      </div>
+    </section>
+
+    <aside>
+      <div class="card" style="margin-bottom: 16px;">
+        <label class="muted">Raw Request</label>
+        <pre id="raw-request" style="height: 180px;">—</pre>
+        <button class="copy-btn small ghost" onclick="copyToClipboard('raw-request')">Copy</button>
+      </div>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <label class="muted">Raw Response</label>
+        <pre id="raw-response" style="height: 180px;">—</pre>
+        <button class="copy-btn small ghost" onclick="copyToClipboard('raw-response')">Copy</button>
+      </div>
+
+      <div class="card">
+        <label class="muted">Request Timing</label>
+        <div id="timing-breakdown" class="muted" style="margin-top: 8px;"></div>
+      </div>
+
+      <div class="card" style="margin-top: 16px;">
+        <label class="muted">Keyboard Shortcuts</label>
+        <div class="muted" style="margin-top: 8px; font-size: 12px;">
+          <div><kbd>Ctrl/Cmd + K</kbd> - Focus API URL</div>
+          <div><kbd>Ctrl/Cmd + Enter</kbd> - Run Query</div>
+          <div><kbd>Ctrl/Cmd + S</kbd> - Save URL</div>
+          <div><kbd>Esc</kbd> - Clear results</div>
+        </div>
       </div>
     </aside>
   </div>
@@ -195,351 +802,1163 @@
 
 <script>
 (() => {
-  // Elements
-  const apiBaseEl = document.getElementById('api-base');
-  const btnSave = document.getElementById('btn-save');
-  const btnTest = document.getElementById('btn-test');
-  const btnRefresh = document.getElementById('btn-refresh');
-  const datasetsList = document.getElementById('datasets-list');
-  const selectedDataset = document.getElementById('selected-dataset');
-  const btnSchema = document.getElementById('btn-schema');
-  const btnQuery = document.getElementById('btn-query');
-  const btnExport = document.getElementById('btn-export');
-  const qSearch = document.getElementById('q-search');
-  const qLimit = document.getElementById('q-limit');
-  const results = document.getElementById('results');
-  const diagConn = document.getElementById('diag-conn');
-  const diagLatency = document.getElementById('diag-latency');
-  const diagHttp = document.getElementById('diag-http');
-  const diagMessage = document.getElementById('diag-message');
-  const btnDiagnose = document.getElementById('btn-diagnose');
-  const rawReq = document.getElementById('raw-request');
-  const rawRes = document.getElementById('raw-response');
-  const curlExample = document.getElementById('curl-example');
-  const btnCreate = document.getElementById('btn-create');
-  const createJson = document.getElementById('create-json');
-  const btnUpdate = document.getElementById('btn-update');
-  const btnDelete = document.getElementById('btn-delete');
-  const updateId = document.getElementById('update-id');
-  const updateJson = document.getElementById('update-json');
-  const btnImport = document.getElementById('btn-import');
-  const csvFile = document.getElementById('csv-file');
-  const importMode = document.getElementById('import-mode');
-  const btnClearCreate = document.getElementById('btn-clear-create');
-  const liveStatus = document.getElementById('live-status');
-  const btnRefreshDatasets = document.getElementById('btn-refresh');
+  // State management
+  const state = {
+    baseUrl: localStorage.getItem('csv_api_base') || '',
+    datasets: [],
+    currentDataset: '',
+    requestHistory: JSON.parse(localStorage.getItem('request_history') || '[]'),
+    queryPresets: JSON.parse(localStorage.getItem('query_presets') || '[]'),
+    filters: [],
+    currentResults: null,
+    theme: localStorage.getItem('theme') || 'dark',
+  };
 
-  // State
-  let base = localStorage.getItem('csv_api_base') || '';
-  apiBaseEl.value = base;
-  updateCurlExample();
+  // Initialize theme
+  document.body.setAttribute('data-theme', state.theme);
 
-  function setStatus(text, type='idle') {
-    liveStatus.textContent = text;
-    liveStatus.style.background = type === 'ok' ? 'linear-gradient(90deg,#064e3b,#10b981)' : (type==='err' ? 'linear-gradient(90deg,#4c1d95,#ef4444)' : '');
+  // Toast notification system
+  function showToast(message, type = 'info', duration = 3000) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+      <span>${message}</span>
+      <button class="small ghost" onclick="this.parentElement.remove()" style="margin-left: auto;">×</button>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), duration);
+    return toast;
   }
 
-  function showRaw(req, res) {
-    rawReq.textContent = JSON.stringify(req, null, 2);
-    rawRes.textContent = res ? (typeof res === 'string' ? res : JSON.stringify(res, null, 2)) : '—';
+  // Set status
+  function setStatus(text, type = 'idle') {
+    const el = document.getElementById('live-status');
+    el.textContent = text;
+    el.className = `pill ${type === 'ok' ? 'status-ok' : type === 'err' ? 'status-err' : ''}`;
   }
 
-  function updateCurlExample() {
-    const b = (apiBaseEl.value || localStorage.getItem('csv_api_base') || '').replace(/\/$/, '');
-    if (!b) { curlExample.textContent = 'Set API Base URL to generate curl examples.'; return; }
-    const txt = [
-      `# List datasets`,
-      `curl -i "${b}/datasets"`,
-      ``,
-      `# Query rows (search)`,
-      `curl -i "${b}/datasets/agents/rows?search=assistant&limit=10"`,
-      ``,
-      `# Create row`,
-      `curl -i -X POST "${b}/datasets/agents/rows" -H "Content-Type: application/json" -d '{"name":"AgentX","role":"assistant"}'`,
-      ``,
-      `# Import (server-side, no CORS)`,
-      `curl -i -X POST "${b}/datasets/agents/import?mode=append" -F "file=@myfile.csv"`,
-    ].join('\\n');
-    curlExample.textContent = txt;
-  }
+  // Copy to clipboard
+  window.copyToClipboard = function(elementId) {
+    const el = document.getElementById(elementId);
+    const text = el.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('Copied to clipboard!', 'success', 2000);
+    });
+  };
 
+  // API URL helper
   function apiUrl(path) {
-    const b = (apiBaseEl.value || localStorage.getItem('csv_api_base') || '').replace(/\/$/, '');
-    return b ? (b + path) : null;
+    const base = (document.getElementById('api-base').value || state.baseUrl).replace(/\/$/, '');
+    return base ? (base + path) : null;
   }
 
-  async function runFetch(method, path, {json=null, form=null, signal=null}={}) {
+  // Run fetch with timing
+  async function runFetch(method, path, {json = null, form = null, signal = null} = {}) {
     const url = apiUrl(path);
     if (!url) throw new Error('API base URL not set');
-    const opts = {method, headers:{}, signal};
-    if (json) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(json); }
+    
+    const requestData = {method, url, body: json || (form ? '(form/file)' : null)};
+    showRaw('raw-request', requestData);
+    
+    const timing = {
+      start: performance.now(),
+      dns: null,
+      connect: null,
+      response: null,
+      end: null,
+    };
+    
+    const opts = {method, headers: {}, signal};
+    if (json) {
+      opts.headers['Content-Type'] = 'application/json';
+      opts.body = JSON.stringify(json);
+    }
     if (form) opts.body = form;
-    showRaw({method, url, body: json||'(form/file)'}, '…waiting');
-    const t0 = performance.now();
+    
     try {
+      const t0 = performance.now();
       const resp = await fetch(url, opts);
-      const dt = performance.now() - t0;
-      diagLatency.textContent = `${Math.round(dt)} ms`;
-      diagLatency.style.background = '';
-      diagConn.textContent = 'reachable';
-      diagConn.className = 'pill';
-      diagHttp.textContent = `${resp.status} ${resp.statusText}`;
-      diagHttp.className = resp.ok ? 'pill status-ok' : 'pill status-err';
-      let contentType = resp.headers.get('content-type') || '';
+      timing.response = performance.now() - t0;
+      
+      const contentType = resp.headers.get('content-type') || '';
       let payload;
       if (contentType.includes('application/json')) {
         payload = await resp.json();
       } else {
         payload = await resp.text();
       }
-      showRaw({method, url, body: json||'(form/file)'}, {status: resp.status, headers: Object.fromEntries(resp.headers.entries()), body: payload});
-      return {ok: resp.ok, status: resp.status, payload, resp};
+      timing.end = performance.now() - timing.start;
+      
+      showRaw('raw-response', {
+        status: resp.status,
+        statusText: resp.statusText,
+        headers: Object.fromEntries(resp.headers.entries()),
+        body: payload
+      });
+      
+      updateTiming(timing);
+      updateConnectionQuality(timing.response);
+      
+      // Save to history
+      state.requestHistory.unshift({
+        method,
+        path,
+        status: resp.status,
+        timestamp: new Date().toISOString(),
+        duration: timing.end,
+      });
+      if (state.requestHistory.length > 100) state.requestHistory.pop();
+      localStorage.setItem('request_history', JSON.stringify(state.requestHistory));
+      renderHistory();
+      
+      return {ok: resp.ok, status: resp.status, payload, resp, timing};
     } catch (err) {
-      // network error / CORS blocked leads here (TypeError)
-      const dt = performance.now() - t0;
-      diagLatency.textContent = `${Math.round(dt)} ms`;
-      diagConn.textContent = 'unreachable';
-      diagConn.className = 'pill status-err';
-      diagHttp.textContent = 'network error';
-      diagMessage.textContent = 'Network error — likely CORS blocked or network unreachable. Check Console for details and verify server allows cross-origin from this origin.';
-      showRaw({method, url, body: json||'(form/file)'}, String(err));
+      timing.end = performance.now() - timing.start;
+      showRaw('raw-response', String(err));
+      updateConnectionQuality(null);
       throw err;
     }
   }
 
+  function showRaw(elementId, data) {
+    const el = document.getElementById(elementId);
+    el.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+  }
+
+  function updateTiming(timing) {
+    const el = document.getElementById('timing-breakdown');
+    el.innerHTML = `
+      <div>Total: ${timing.end?.toFixed(2) || '—'} ms</div>
+      <div>Response: ${timing.response?.toFixed(2) || '—'} ms</div>
+    `;
+  }
+
+  function updateConnectionQuality(latency) {
+    const indicator = document.getElementById('conn-indicator');
+    const quality = document.getElementById('diag-quality');
+    const latencyEl = document.getElementById('diag-latency');
+    
+    if (latency === null) {
+      indicator.className = 'connection-indicator';
+      quality.textContent = '—';
+      latencyEl.textContent = '—';
+      return;
+    }
+    
+    latencyEl.textContent = `${Math.round(latency)} ms`;
+    
+    if (latency < 100) {
+      indicator.className = 'connection-indicator excellent';
+      quality.textContent = 'Excellent';
+    } else if (latency < 300) {
+      indicator.className = 'connection-indicator good';
+      quality.textContent = 'Good';
+    } else if (latency < 1000) {
+      indicator.className = 'connection-indicator fair';
+      quality.textContent = 'Fair';
+    } else {
+      indicator.className = 'connection-indicator poor';
+      quality.textContent = 'Poor';
+    }
+  }
+
+  // List datasets
   async function listDatasets() {
     try {
+      setStatus('loading...', '');
       const res = await runFetch('GET', '/datasets');
       if (res.ok) {
-        renderDatasets(res.payload);
-        setStatus('datasets loaded','ok');
+        state.datasets = res.payload;
+        renderDatasets();
+        setStatus('datasets loaded', 'ok');
+        showToast(`Loaded ${res.payload.length} datasets`, 'success');
       } else {
-        setStatus('error','err');
+        setStatus('error', 'err');
+        showToast('Failed to load datasets', 'error');
       }
     } catch (e) {
-      setStatus('error','err');
+      setStatus('error', 'err');
+      showToast('Network error: ' + e.message, 'error');
       console.error(e);
     }
   }
 
-  function renderDatasets(arr) {
-    datasetsList.innerHTML = '';
-    if (!Array.isArray(arr) || arr.length===0) {
-      datasetsList.innerHTML = '<div class="muted">No datasets found</div>';
+  function renderDatasets() {
+    const container = document.getElementById('datasets-list');
+    container.innerHTML = '';
+    if (!state.datasets || state.datasets.length === 0) {
+      container.innerHTML = '<div class="muted">No datasets found</div>';
       return;
     }
-    arr.forEach(fn=>{
-      const name = fn.replace(/\\.csv$/i,'');
+    state.datasets.forEach(fn => {
+      const name = fn.replace(/\.csv$/i, '');
       const el = document.createElement('div');
-      el.style.display='flex';
-      el.style.justifyContent='space-between';
-      el.style.alignItems='center';
-      el.style.padding='6px';
-      el.style.borderBottom='1px solid rgba(255,255,255,0.02)';
-      el.innerHTML = `<div style="font-size:14px">${name}</div>`;
-      const actions = document.createElement('div');
-      actions.style.display='flex';
-      actions.style.gap='6px';
-      const btnSel = document.createElement('button'); btnSel.textContent='Select'; btnSel.className='small ghost';
-      btnSel.onclick = ()=>{ selectedDataset.value = name; setStatus('selected',''); updateCurlExample(); };
-      const btnView = document.createElement('button'); btnView.textContent='View'; btnView.className='small';
-      btnView.onclick = ()=>{ selectedDataset.value = name; queryRows(); };
-      actions.appendChild(btnSel); actions.appendChild(btnView);
-      el.appendChild(actions);
-      datasetsList.appendChild(el);
+      el.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 6px; border-bottom: 1px solid var(--border); cursor: pointer;';
+      el.innerHTML = `<div style="font-size: 14px;">${name}</div>`;
+      el.onclick = () => {
+        document.getElementById('selected-dataset').value = name;
+        state.currentDataset = name;
+      };
+      container.appendChild(el);
     });
   }
 
+  // Query rows
   async function queryRows() {
-    const name = selectedDataset.value.trim();
-    if (!name) { alert('Select a dataset'); return; }
+    const name = document.getElementById('selected-dataset').value.trim() || state.currentDataset;
+    if (!name) {
+      showToast('Select a dataset first', 'warning');
+      return;
+    }
+    
     const params = new URLSearchParams();
-    if (qSearch.value) params.set('search', qSearch.value);
-    if (qLimit.value) params.set('limit', qLimit.value);
+    const search = document.getElementById('q-search').value;
+    const limit = document.getElementById('q-limit').value;
+    const offset = document.getElementById('q-offset').value;
+    const sortBy = document.getElementById('q-sort-by').value;
+    const sortOrder = document.getElementById('q-sort-order').value;
+    
+    if (search) params.set('search', search);
+    if (limit) params.set('limit', limit);
+    if (offset) params.set('offset', offset);
+    if (sortBy) params.set('sort_by', sortBy);
+    if (sortOrder) params.set('sort_order', sortOrder);
+    
+    // Add filters
+    state.filters.forEach((f, i) => {
+      if (f.field && f.operator && f.value) {
+        params.set(`field`, f.field);
+        params.set(`operator`, f.operator);
+        params.set(`value`, f.value);
+      }
+    });
+    
     const path = `/datasets/${encodeURIComponent(name)}/rows?${params.toString()}`;
     try {
+      setStatus('querying...', '');
       const res = await runFetch('GET', path);
       if (res.ok) {
+        state.currentResults = res.payload;
         renderResults(res.payload);
+        setStatus('query complete', 'ok');
+        showToast(`Found ${res.payload.total} rows`, 'success');
       } else {
-        results.innerHTML = `<div class="muted">Error: ${res.status}</div>`;
+        showToast(`Query failed: ${res.status}`, 'error');
       }
     } catch (e) {
+      showToast('Query error: ' + e.message, 'error');
       console.error(e);
-      results.innerHTML = `<div class="muted">Network / CORS error. Open browser console for details.</div>`;
     }
-    updateCurlExample();
   }
 
   function renderResults(payload) {
-    results.innerHTML = '';
-    if (!payload || !Array.isArray(payload.rows)) { results.textContent = 'No results'; return; }
-    const total = document.createElement('div'); total.textContent = `Total: ${payload.total}`;
-    total.className='muted';
-    results.appendChild(total);
-    const table = document.createElement('table');
-    const rows = payload.rows;
-    if (rows.length === 0) {
-      const e = document.createElement('div'); e.className='muted'; e.textContent = 'No rows';
-      results.appendChild(e);
+    const container = document.getElementById('results');
+    const countEl = document.getElementById('results-count');
+    const paginationEl = document.getElementById('pagination-info');
+    
+    countEl.textContent = payload.total || 0;
+    
+    if (payload.links) {
+      const links = payload.links;
+      paginationEl.innerHTML = `
+        ${links.prev ? `<a href="#" onclick="event.preventDefault(); loadPage('${links.prev}');">← Prev</a>` : ''}
+        ${links.next ? `<a href="#" onclick="event.preventDefault(); loadPage('${links.next}');">Next →</a>` : ''}
+      `;
+    }
+    
+    container.innerHTML = '';
+    if (!payload.rows || payload.rows.length === 0) {
+      container.innerHTML = '<div class="muted">No results</div>';
       return;
     }
-    const headers = Object.keys(rows[0]);
+    
+    const table = document.createElement('table');
+    const headers = Object.keys(payload.rows[0]);
     const thead = document.createElement('thead');
-    thead.innerHTML = '<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>';
+    thead.innerHTML = '<tr>' + headers.map(h => `<th>${escapeHtml(h)}</th>`).join('') + '</tr>';
     table.appendChild(thead);
+    
     const tbody = document.createElement('tbody');
-    rows.forEach(r=>{
+    payload.rows.forEach(r => {
       const tr = document.createElement('tr');
-      tr.innerHTML = headers.map(h=>`<td>${escapeHtml(String(r[h] ?? ''))}</td>`).join('');
+      tr.innerHTML = headers.map(h => `<td>${escapeHtml(String(r[h] ?? ''))}</td>`).join('');
       tbody.appendChild(tr);
     });
     table.appendChild(tbody);
-    results.appendChild(table);
+    container.appendChild(table);
   }
 
-  // CRUD handlers
+  window.loadPage = async function(url) {
+    const path = url.replace(/^https?:\/\/[^\/]+/, '');
+    const res = await runFetch('GET', path);
+    if (res.ok) {
+      state.currentResults = res.payload;
+      renderResults(res.payload);
+    }
+  };
+
+  // CRUD operations
   async function createRow() {
-    const name = selectedDataset.value.trim();
-    if (!name) { alert('Select a dataset'); return; }
+    const name = document.getElementById('selected-dataset').value.trim() || state.currentDataset;
+    if (!name) {
+      showToast('Select a dataset', 'warning');
+      return;
+    }
     let body;
-    try { body = JSON.parse(createJson.value); } catch (e) { alert('Invalid JSON'); return; }
+    try {
+      body = JSON.parse(document.getElementById('create-json').value);
+    } catch (e) {
+      showToast('Invalid JSON', 'error');
+      return;
+    }
     try {
       const res = await runFetch('POST', `/datasets/${encodeURIComponent(name)}/rows`, {json: body});
-      if (res.ok) { alert('Created. ID: ' + (res.payload.id || '(unknown)')); queryRows(); } else { alert('Create failed: ' + JSON.stringify(res.payload)); }
-    } catch (e) { console.error(e); }
+      if (res.ok) {
+        showToast('Row created successfully', 'success');
+        queryRows();
+      } else {
+        showToast('Create failed: ' + JSON.stringify(res.payload), 'error');
+      }
+    } catch (e) {
+      showToast('Create error: ' + e.message, 'error');
+    }
   }
 
   async function updateRow() {
-    const name = selectedDataset.value.trim();
-    const id = updateId.value.trim();
-    if (!name || !id) { alert('Select dataset and enter id'); return; }
+    const name = document.getElementById('selected-dataset').value.trim() || state.currentDataset;
+    const id = document.getElementById('update-id').value.trim();
+    if (!name || !id) {
+      showToast('Enter dataset name and row ID', 'warning');
+      return;
+    }
     let body;
-    try { body = JSON.parse(updateJson.value); } catch (e) { alert('Invalid JSON'); return; }
+    try {
+      body = JSON.parse(document.getElementById('update-json').value);
+    } catch (e) {
+      showToast('Invalid JSON', 'error');
+      return;
+    }
     try {
       const res = await runFetch('PUT', `/datasets/${encodeURIComponent(name)}/rows/${encodeURIComponent(id)}`, {json: body});
-      if (res.ok) { alert('Updated'); queryRows(); } else { alert('Update failed: ' + JSON.stringify(res.payload)); }
-    } catch (e) { console.error(e); }
+      if (res.ok) {
+        showToast('Row updated', 'success');
+        queryRows();
+      } else {
+        showToast('Update failed', 'error');
+      }
+    } catch (e) {
+      showToast('Update error: ' + e.message, 'error');
+    }
   }
 
   async function deleteRow() {
-    const name = selectedDataset.value.trim();
-    const id = updateId.value.trim();
-    if (!name || !id) { alert('Select dataset and enter id'); return; }
-    if (!confirm('Delete row ' + id + ' from ' + name + '?')) return;
+    const name = document.getElementById('selected-dataset').value.trim() || state.currentDataset;
+    const id = document.getElementById('update-id').value.trim();
+    if (!name || !id) {
+      showToast('Enter dataset name and row ID', 'warning');
+      return;
+    }
+    if (!confirm(`Delete row ${id} from ${name}?`)) return;
     try {
       const res = await runFetch('DELETE', `/datasets/${encodeURIComponent(name)}/rows/${encodeURIComponent(id)}`);
-      if (res.ok || res.status===204) { alert('Deleted'); queryRows(); } else { alert('Delete failed'); }
-    } catch (e) { console.error(e); }
-  }
-
-  async function showSchema() {
-    const name = selectedDataset.value.trim();
-    if (!name) { alert('Select dataset'); return; }
-    try {
-      const res = await runFetch('GET', `/datasets/${encodeURIComponent(name)}/schema`);
-      if (res.ok) {
-        results.innerHTML = '<div class="muted">Schema:</div><pre>' + JSON.stringify(res.payload, null, 2) + '</pre>';
+      if (res.ok || res.status === 204) {
+        showToast('Row deleted', 'success');
+        queryRows();
       } else {
-        results.innerHTML = '<div class="muted">Error retrieving schema</div>';
+        showToast('Delete failed', 'error');
       }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      showToast('Delete error: ' + e.message, 'error');
+    }
   }
 
-  async function exportCsv() {
-    const name = selectedDataset.value.trim();
-    if (!name) { alert('Select dataset'); return; }
-    const url = apiUrl(`/datasets/${encodeURIComponent(name)}/export`);
-    if (!url) { alert('Set API base URL'); return; }
-    // open in new tab to trigger download; note CORS must allow this
+  // Bulk operations
+  async function bulkCreate() {
+    const name = document.getElementById('selected-dataset').value.trim() || state.currentDataset;
+    if (!name) {
+      showToast('Select a dataset', 'warning');
+      return;
+    }
+    let body;
+    try {
+      body = JSON.parse(document.getElementById('bulk-create-json').value);
+    } catch (e) {
+      showToast('Invalid JSON', 'error');
+      return;
+    }
+    try {
+      const res = await runFetch('POST', `/datasets/${encodeURIComponent(name)}/rows/bulk`, {json: body});
+      if (res.ok) {
+        showToast(`Created ${res.payload.created} rows`, 'success');
+        queryRows();
+      } else {
+        showToast('Bulk create failed', 'error');
+      }
+    } catch (e) {
+      showToast('Bulk create error: ' + e.message, 'error');
+    }
+  }
+
+  async function bulkUpdate() {
+    const name = document.getElementById('selected-dataset').value.trim() || state.currentDataset;
+    if (!name) {
+      showToast('Select a dataset', 'warning');
+      return;
+    }
+    let body;
+    try {
+      body = JSON.parse(document.getElementById('bulk-update-json').value);
+    } catch (e) {
+      showToast('Invalid JSON', 'error');
+      return;
+    }
+    try {
+      const res = await runFetch('PUT', `/datasets/${encodeURIComponent(name)}/rows/bulk`, {json: body});
+      if (res.ok) {
+        showToast(`Updated ${res.payload.updated} rows`, 'success');
+        queryRows();
+      } else {
+        showToast('Bulk update failed', 'error');
+      }
+    } catch (e) {
+      showToast('Bulk update error: ' + e.message, 'error');
+    }
+  }
+
+  async function bulkDelete() {
+    const name = document.getElementById('selected-dataset').value.trim() || state.currentDataset;
+    if (!name) {
+      showToast('Select a dataset', 'warning');
+      return;
+    }
+    let body;
+    try {
+      body = JSON.parse(document.getElementById('bulk-delete-json').value);
+    } catch (e) {
+      showToast('Invalid JSON', 'error');
+      return;
+    }
+    if (!confirm(`Delete ${body.ids?.length || 0} rows?`)) return;
+    try {
+      const res = await runFetch('DELETE', `/datasets/${encodeURIComponent(name)}/rows/bulk`, {json: body});
+      if (res.ok) {
+        showToast(`Deleted ${res.payload.deleted} rows`, 'success');
+        queryRows();
+      } else {
+        showToast('Bulk delete failed', 'error');
+      }
+    } catch (e) {
+      showToast('Bulk delete error: ' + e.message, 'error');
+    }
+  }
+
+  // Export
+  async function exportJson() {
+    if (!state.currentResults) {
+      showToast('No results to export', 'warning');
+      return;
+    }
+    const blob = new Blob([JSON.stringify(state.currentResults.rows, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${state.currentDataset || 'export'}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('JSON exported', 'success');
+  }
+
+  async function exportCsvFile() {
+    const name = document.getElementById('selected-dataset').value.trim() || state.currentDataset;
+    if (!name) {
+      showToast('Select a dataset', 'warning');
+      return;
+    }
+    const url = apiUrl(`/datasets/${encodeURIComponent(name)}/export?format=csv`);
+    if (!url) {
+      showToast('Set API base URL', 'warning');
+      return;
+    }
     window.open(url, '_blank');
+    showToast('CSV export started', 'success');
   }
 
+  async function exportJsonFile() {
+    const name = document.getElementById('selected-dataset').value.trim() || state.currentDataset;
+    if (!name) {
+      showToast('Select a dataset', 'warning');
+      return;
+    }
+    const url = apiUrl(`/datasets/${encodeURIComponent(name)}/export?format=json`);
+    if (!url) {
+      showToast('Set API base URL', 'warning');
+      return;
+    }
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+      const url2 = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url2;
+      a.download = `${name}.json`;
+      a.click();
+      URL.revokeObjectURL(url2);
+      showToast('JSON exported', 'success');
+    } catch (e) {
+      showToast('Export error: ' + e.message, 'error');
+    }
+  }
+
+  // Import
   async function importCsv() {
-    const name = selectedDataset.value.trim();
-    if (!name) { alert('Select dataset'); return; }
-    const file = csvFile.files[0];
-    if (!file) { alert('Choose a CSV file'); return; }
-    const mode = importMode.value;
+    const name = document.getElementById('selected-dataset').value.trim() || state.currentDataset;
+    if (!name) {
+      showToast('Select a dataset', 'warning');
+      return;
+    }
+    const file = document.getElementById('csv-file').files[0];
+    if (!file) {
+      showToast('Choose a CSV file', 'warning');
+      return;
+    }
+    const mode = document.getElementById('import-mode').value;
     const form = new FormData();
     form.append('file', file, file.name);
     const path = `/datasets/${encodeURIComponent(name)}/import?mode=${encodeURIComponent(mode)}`;
     try {
       const res = await runFetch('POST', path, {form});
       if (res.ok) {
-        alert('Import result: ' + JSON.stringify(res.payload));
+        showToast('Import successful', 'success');
         queryRows();
       } else {
-        alert('Import failed: ' + JSON.stringify(res.payload));
+        showToast('Import failed', 'error');
       }
-    } catch (e) { console.error(e); alert('Import error: check console for details'); }
-  }
-
-  async function quickTest() {
-    setStatus('testing...');
-    diagMessage.textContent = 'Running quick test: GET /datasets';
-    try {
-      const t0 = performance.now();
-      const res = await runFetch('GET', '/datasets');
-      const dt = performance.now() - t0;
-      if (res.ok) {
-        diagMessage.textContent = `OK — ${res.payload.length || 0} dataset(s). Latency ~${Math.round(dt)}ms.`;
-        setStatus('ok','ok');
-      } else {
-        diagMessage.textContent = `Server returned ${res.status}. See response for details.`;
-        setStatus('error','err');
-      }
-    } catch (err) {
-      diagMessage.textContent = 'Network/CORS error. Check server CORS and console.';
-      setStatus('error','err');
-    }
-  }
-
-  async function fullDiagnose() {
-    setStatus('diagnosing...');
-    diagMessage.textContent = 'Running full diagnostics: /datasets, /openapi.json (if present), sample POST (dry-run)...';
-    diagConn.textContent = 'testing...';
-    diagLatency.textContent = '…';
-    try {
-      const ds = await runFetch('GET', '/datasets');
-      if (!ds.ok) { diagMessage.textContent = 'Error fetching /datasets: ' + JSON.stringify(ds.payload); setStatus('error','err'); return; }
-      // try openapi
-      let openapiOk = false;
-      try {
-        const op = await runFetch('GET', '/openapi.json');
-        openapiOk = op.ok;
-      } catch(e){}
-      diagMessage.textContent = `datasets OK (${(ds.payload||[]).length} items). openapi.json ${openapiOk ? 'found' : 'not found'}.`;
-      setStatus('ok','ok');
     } catch (e) {
-      diagMessage.textContent = 'Full diagnosis failed: network/CORS or server unreachable.';
-      setStatus('error','err');
+      showToast('Import error: ' + e.message, 'error');
     }
   }
 
-  // Utilities
-  function escapeHtml(s){ return s.replace(/[&<>"'`]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;', '`':'&#96;' }[c])); }
+  // Health check
+  async function healthCheck() {
+    try {
+      const res = await runFetch('GET', '/health');
+      if (res.ok) {
+        showToast('Health check passed', 'success');
+        showRaw('raw-response', res.payload);
+      }
+    } catch (e) {
+      showToast('Health check failed', 'error');
+    }
+  }
 
-  // Event wiring
-  btnSave.onclick = ()=>{ localStorage.setItem('csv_api_base', apiBaseEl.value.trim()); updateCurlExample(); alert('Saved'); };
-  btnTest.onclick = quickTest;
-  btnDiagnose.onclick = fullDiagnose;
-  btnRefreshDatasets.onclick = listDatasets;
-  btnSchema.onclick = showSchema;
-  btnQuery.onclick = queryRows;
-  btnExport.onclick = exportCsv;
-  btnCreate.onclick = createRow;
-  btnUpdate.onclick = updateRow;
-  btnDelete.onclick = deleteRow;
-  btnImport.onclick = importCsv;
-  btnClearCreate.onclick = ()=>{ createJson.value=''; };
+  async function getMetrics() {
+    try {
+      const res = await runFetch('GET', '/metrics');
+      if (res.ok) {
+        showRaw('raw-response', res.payload);
+      }
+    } catch (e) {
+      showToast('Failed to get metrics', 'error');
+    }
+  }
 
-  // auto-load datasets if base present
-  window.addEventListener('load', ()=>{ if (apiBaseEl.value) listDatasets(); });
+  // History
+  function renderHistory() {
+    const container = document.getElementById('history-list');
+    container.innerHTML = '';
+    if (state.requestHistory.length === 0) {
+      container.innerHTML = '<div class="muted">No history</div>';
+      return;
+    }
+    state.requestHistory.forEach((item, i) => {
+      const el = document.createElement('div');
+      el.className = 'history-item';
+      el.innerHTML = `
+        <div style="display: flex; justify-content: space-between;">
+          <div>
+            <strong>${item.method}</strong> ${item.path}
+            <div class="muted" style="font-size: 11px;">${new Date(item.timestamp).toLocaleString()}</div>
+          </div>
+          <div>
+            <span class="pill ${item.status < 400 ? 'status-ok' : 'status-err'}">${item.status}</span>
+            <span class="muted" style="font-size: 11px;">${item.duration?.toFixed(0)}ms</span>
+          </div>
+        </div>
+      `;
+      el.onclick = () => {
+        // Could reload this request
+      };
+      container.appendChild(el);
+    });
+  }
 
-  // small UX: allow Enter in selected-dataset to query
-  selectedDataset.addEventListener('keypress', (e)=>{ if (e.key === 'Enter') queryRows(); });
+  // Filters
+  function addFilter() {
+    state.filters.push({field: '', operator: 'eq', value: ''});
+    renderFilters();
+  }
 
+  function renderFilters() {
+    const container = document.getElementById('filter-container');
+    container.innerHTML = '';
+    state.filters.forEach((f, i) => {
+      const row = document.createElement('div');
+      row.className = 'filter-row';
+      row.innerHTML = `
+        <input type="text" placeholder="Field" value="${f.field}" onchange="state.filters[${i}].field = this.value" />
+        <select onchange="state.filters[${i}].operator = this.value">
+          <option value="eq" ${f.operator === 'eq' ? 'selected' : ''}>Equals</option>
+          <option value="ne" ${f.operator === 'ne' ? 'selected' : ''}>Not equals</option>
+          <option value="contains" ${f.operator === 'contains' ? 'selected' : ''}>Contains</option>
+          <option value="regex" ${f.operator === 'regex' ? 'selected' : ''}>Regex</option>
+          <option value="gt" ${f.operator === 'gt' ? 'selected' : ''}>Greater than</option>
+          <option value="lt" ${f.operator === 'lt' ? 'selected' : ''}>Less than</option>
+          <option value="date_after" ${f.operator === 'date_after' ? 'selected' : ''}>Date after</option>
+          <option value="date_before" ${f.operator === 'date_before' ? 'selected' : ''}>Date before</option>
+        </select>
+        <input type="text" placeholder="Value" value="${f.value}" onchange="state.filters[${i}].value = this.value" />
+        <button class="small warn" onclick="state.filters.splice(${i}, 1); renderFilters();">×</button>
+      `;
+      container.appendChild(row);
+    });
+  }
+
+  // Presets
+  function savePreset() {
+    const name = prompt('Preset name:');
+    if (!name) return;
+    const preset = {
+      name,
+      dataset: document.getElementById('selected-dataset').value,
+      search: document.getElementById('q-search').value,
+      limit: document.getElementById('q-limit').value,
+      filters: state.filters,
+    };
+    state.queryPresets.push(preset);
+    localStorage.setItem('query_presets', JSON.stringify(state.queryPresets));
+    renderPresets();
+    showToast('Preset saved', 'success');
+  }
+
+  function renderPresets() {
+    const container = document.getElementById('presets-list');
+    container.innerHTML = '';
+    state.queryPresets.forEach((p, i) => {
+      const el = document.createElement('div');
+      el.className = 'preset-item';
+      el.innerHTML = `
+        <div>
+          <strong>${p.name}</strong>
+          <div class="muted" style="font-size: 11px;">${p.dataset}</div>
+        </div>
+        <button class="small ghost" onclick="loadPreset(${i})">Load</button>
+      `;
+      container.appendChild(el);
+    });
+  }
+
+  window.loadPreset = function(i) {
+    const p = state.queryPresets[i];
+    document.getElementById('selected-dataset').value = p.dataset || '';
+    document.getElementById('q-search').value = p.search || '';
+    document.getElementById('q-limit').value = p.limit || '50';
+    state.filters = p.filters || [];
+    renderFilters();
+    queryRows();
+  };
+
+  // API Docs
+  async function loadApiDocs() {
+    try {
+      const res = await runFetch('GET', '/openapi.json');
+      if (res.ok) {
+        const docs = res.payload;
+        const container = document.getElementById('api-docs');
+        container.innerHTML = '<pre>' + JSON.stringify(docs, null, 2) + '</pre>';
+      }
+    } catch (e) {
+      document.getElementById('api-docs').innerHTML = '<div class="muted">Could not load API docs</div>';
+    }
+  }
+
+  function loadCodeExamples() {
+    const base = apiUrl('') || 'https://api.example.com';
+    const name = state.currentDataset || 'users';
+    const examples = {
+      curl: `# List datasets
+curl "${base}/datasets"
+
+# Query rows
+curl "${base}/datasets/${name}/rows?search=test&limit=10"
+
+# Create row
+curl -X POST "${base}/datasets/${name}/rows" \\
+  -H "Content-Type: application/json" \\
+  -d '{"name":"Test","value":123}'
+
+# Update row
+curl -X PUT "${base}/datasets/${name}/rows/123" \\
+  -H "Content-Type: application/json" \\
+  -d '{"name":"Updated"}'
+
+# Delete row
+curl -X DELETE "${base}/datasets/${name}/rows/123"`,
+      python: `import requests
+
+base = "${base}"
+
+# List datasets
+r = requests.get(f"{base}/datasets")
+print(r.json())
+
+# Query rows
+r = requests.get(f"{base}/datasets/${name}/rows", params={"search": "test", "limit": 10})
+print(r.json())
+
+# Create row
+r = requests.post(f"{base}/datasets/${name}/rows", json={"name": "Test", "value": 123})
+print(r.json())
+
+# Update row
+r = requests.put(f"{base}/datasets/${name}/rows/123", json={"name": "Updated"})
+print(r.json())
+
+# Delete row
+r = requests.delete(f"{base}/datasets/${name}/rows/123")
+print(r.status_code)`,
+      javascript: `const base = "${base}";
+
+// List datasets
+fetch(\`\${base}/datasets\`)
+  .then(r => r.json())
+  .then(console.log);
+
+// Query rows
+fetch(\`\${base}/datasets/${name}/rows?search=test&limit=10\`)
+  .then(r => r.json())
+  .then(console.log);
+
+// Create row
+fetch(\`\${base}/datasets/${name}/rows\`, {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({name: "Test", value: 123})
+})
+  .then(r => r.json())
+  .then(console.log);
+
+// Update row
+fetch(\`\${base}/datasets/${name}/rows/123\`, {
+  method: 'PUT',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({name: "Updated"})
+})
+  .then(r => r.json())
+  .then(console.log);
+
+// Delete row
+fetch(\`\${base}/datasets/${name}/rows/123\`, {method: 'DELETE'})
+  .then(r => console.log(r.status));`
+    };
+    
+    const container = document.getElementById('code-examples');
+    let currentTab = 'curl';
+    container.innerHTML = `<div class="code-block"><pre id="code-content">${examples.curl}</pre><button class="copy-btn small ghost" onclick="copyToClipboard('code-content')">Copy</button></div>`;
+    
+    document.querySelectorAll('[data-code-tab]').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('[data-code-tab]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTab = btn.dataset.codeTab;
+        document.getElementById('code-content').textContent = examples[currentTab];
+      };
+    });
+  }
+
+  function loadQuickStart() {
+    document.getElementById('quick-start').innerHTML = `
+      <ol>
+        <li>Set your API base URL in the top field</li>
+        <li>Click "Test" to verify connectivity</li>
+        <li>Select a dataset from the list</li>
+        <li>Use the Query tab to search and filter data</li>
+        <li>Use CRUD Operations to create, update, or delete rows</li>
+        <li>Use Bulk Operations for multiple rows at once</li>
+        <li>Export data in CSV or JSON format</li>
+      </ol>
+    `;
+  }
+
+  function loadFAQ() {
+    document.getElementById('faq').innerHTML = `
+      <div style="margin-bottom: 16px;">
+        <strong>Q: CORS errors?</strong><br>
+        A: Make sure your API server has CORS enabled. Check the server configuration.
+      </div>
+      <div style="margin-bottom: 16px;">
+        <strong>Q: How do I filter by date?</strong><br>
+        A: Use the advanced filters with "date_after" or "date_before" operators. Dates should be in ISO format.
+      </div>
+      <div style="margin-bottom: 16px;">
+        <strong>Q: Can I use regex?</strong><br>
+        A: Yes! Use the "regex" operator in advanced filters.
+      </div>
+      <div style="margin-bottom: 16px;">
+        <strong>Q: How do I export large datasets?</strong><br>
+        A: Use pagination (limit/offset) or the export endpoints directly.
+      </div>
+    `;
+  }
+
+  // Theme toggle
+  document.getElementById('theme-toggle').onclick = () => {
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', state.theme);
+    localStorage.setItem('theme', state.theme);
+  };
+
+  // Tab switching
+  document.querySelectorAll('.tab[data-tab]').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.tab[data-tab]').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+      
+      if (btn.dataset.tab === 'docs') {
+        loadApiDocs();
+        loadCodeExamples();
+        loadQuickStart();
+        loadFAQ();
+      } else if (btn.dataset.tab === 'history') {
+        renderHistory();
+      } else if (btn.dataset.tab === 'tokenizer') {
+        loadTokenizerModels();
+      }
+    };
+  });
+
+  // Event handlers
+  document.getElementById('api-base').value = state.baseUrl;
+  document.getElementById('btn-save').onclick = () => {
+    state.baseUrl = document.getElementById('api-base').value.trim();
+    localStorage.setItem('csv_api_base', state.baseUrl);
+    showToast('URL saved', 'success');
+  };
+  document.getElementById('btn-test').onclick = async () => {
+    try {
+      const res = await runFetch('GET', '/datasets');
+      if (res.ok) {
+        showToast('Connection successful', 'success');
+        listDatasets();
+      }
+    } catch (e) {
+      showToast('Connection failed: ' + e.message, 'error');
+    }
+  };
+  document.getElementById('btn-refresh').onclick = listDatasets;
+  document.getElementById('btn-query').onclick = queryRows;
+  document.getElementById('btn-create').onclick = createRow;
+  document.getElementById('btn-update').onclick = updateRow;
+  document.getElementById('btn-delete').onclick = deleteRow;
+  document.getElementById('btn-import').onclick = importCsv;
+  document.getElementById('btn-bulk-create').onclick = bulkCreate;
+  document.getElementById('btn-bulk-update').onclick = bulkUpdate;
+  document.getElementById('btn-bulk-delete').onclick = bulkDelete;
+  document.getElementById('btn-export-json').onclick = exportJson;
+  document.getElementById('btn-export-csv').onclick = exportCsvFile;
+  document.getElementById('btn-export-csv-file').onclick = exportCsvFile;
+  document.getElementById('btn-export-json-file').onclick = exportJsonFile;
+  document.getElementById('btn-health').onclick = healthCheck;
+  document.getElementById('btn-metrics').onclick = getMetrics;
+  document.getElementById('btn-add-filter').onclick = addFilter;
+  document.getElementById('btn-save-preset').onclick = savePreset;
+  document.getElementById('btn-clear-history').onclick = () => {
+    state.requestHistory = [];
+    localStorage.setItem('request_history', '[]');
+    renderHistory();
+    showToast('History cleared', 'success');
+  };
+  document.getElementById('btn-clear-create').onclick = () => {
+    document.getElementById('create-json').value = '';
+  };
+  document.getElementById('btn-copy-results').onclick = () => {
+    if (state.currentResults) {
+      navigator.clipboard.writeText(JSON.stringify(state.currentResults.rows, null, 2));
+      showToast('Results copied', 'success');
+    }
+  };
+
+  // Tokenizer event handlers
+  document.getElementById('btn-tokenize').onclick = tokenizeText;
+  document.getElementById('btn-clear-tokenizer').onclick = () => {
+    document.getElementById('tokenizer-input').value = '';
+    tokenizerState.currentResult = null;
+    document.getElementById('token-stats').innerHTML = '';
+    document.getElementById('token-breakdown').innerHTML = '<div class="muted" style="text-align: center; padding: 40px;">Enter text and click "Tokenize" to see token breakdown</div>';
+    document.getElementById('token-visualization').innerHTML = '<div class="muted" style="text-align: center; padding: 40px;">Token visualization will appear here</div>';
+  };
+  document.getElementById('btn-load-example').onclick = loadTokenizerExample;
+  document.getElementById('btn-copy-tokens').onclick = copyTokens;
+  document.getElementById('btn-export-tokens').onclick = exportTokens;
+  document.getElementById('btn-show-tokens').onclick = () => {
+    tokenizerState.showTokens = true;
+    tokenizerState.showIds = false;
+    if (tokenizerState.currentResult) {
+      renderTokenBreakdown(tokenizerState.currentResult);
+    }
+  };
+  document.getElementById('btn-show-ids').onclick = () => {
+    tokenizerState.showIds = true;
+    if (tokenizerState.currentResult) {
+      const container = document.getElementById('token-breakdown');
+      container.innerHTML = `<pre>${JSON.stringify(tokenizerState.currentResult.token_ids, null, 2)}</pre>`;
+    }
+  };
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      document.getElementById('api-base').focus();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      queryRows();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      document.getElementById('btn-save').click();
+    }
+    if (e.key === 'Escape') {
+      document.getElementById('results').innerHTML = '';
+    }
+  });
+
+  // Initialize
+  renderPresets();
+  if (state.baseUrl) {
+    listDatasets();
+  }
+
+  // Tokenizer functions
+  let tokenizerState = {
+    currentResult: null,
+    showTokens: true,
+    showIds: false,
+  };
+
+  async function loadTokenizerModels() {
+    try {
+      const res = await runFetch('GET', '/tokenize/models');
+      if (res.ok && res.payload.available) {
+        // Models loaded, ready to tokenize
+      } else {
+        showToast('Tokenizer service not available', 'warning');
+      }
+    } catch (e) {
+      showToast('Could not load tokenizer models', 'error');
+    }
+  }
+
+  async function tokenizeText() {
+    const text = document.getElementById('tokenizer-input').value.trim();
+    const model = document.getElementById('tokenizer-model').value;
+
+    if (!text) {
+      showToast('Enter text to tokenize', 'warning');
+      return;
+    }
+
+    try {
+      setStatus('tokenizing...', '');
+      const res = await runFetch('POST', '/tokenize', {
+        json: { text, model }
+      });
+
+      if (res.ok) {
+        tokenizerState.currentResult = res.payload;
+        renderTokenStats(res.payload);
+        renderTokenBreakdown(res.payload);
+        renderTokenVisualization(res.payload);
+        setStatus('tokenized', 'ok');
+        showToast(`Tokenized: ${res.payload.token_count} tokens`, 'success');
+      } else {
+        showToast('Tokenization failed', 'error');
+      }
+    } catch (e) {
+      showToast('Tokenization error: ' + e.message, 'error');
+      setStatus('error', 'err');
+    }
+  }
+
+  function renderTokenStats(data) {
+    const container = document.getElementById('token-stats');
+    container.innerHTML = `
+      <div class="card" style="padding: 12px;">
+        <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Token Count</div>
+        <div style="font-size: 24px; font-weight: 600; color: var(--accent);">${data.token_count.toLocaleString()}</div>
+      </div>
+      <div class="card" style="padding: 12px;">
+        <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Character Count</div>
+        <div style="font-size: 24px; font-weight: 600;">${data.character_count.toLocaleString()}</div>
+      </div>
+      <div class="card" style="padding: 12px;">
+        <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Word Count</div>
+        <div style="font-size: 24px; font-weight: 600;">${data.word_count.toLocaleString()}</div>
+      </div>
+      <div class="card" style="padding: 12px;">
+        <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Tokens/Character</div>
+        <div style="font-size: 24px; font-weight: 600;">${data.tokens_per_character.toFixed(3)}</div>
+      </div>
+      <div class="card" style="padding: 12px;">
+        <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Tokens/Word</div>
+        <div style="font-size: 24px; font-weight: 600;">${data.tokens_per_word.toFixed(2)}</div>
+      </div>
+      <div class="card" style="padding: 12px;">
+        <div class="muted" style="font-size: 11px; margin-bottom: 4px;">Est. Cost (USD)</div>
+        <div style="font-size: 24px; font-weight: 600; color: var(--ok);">$${data.estimated_cost_usd.toFixed(6)}</div>
+      </div>
+    `;
+
+    // Update context window bar
+    const percent = data.context_usage_percent;
+    const fill = document.getElementById('context-window-fill');
+    fill.style.width = `${Math.min(percent, 100)}%`;
+    fill.textContent = `${percent.toFixed(1)}%`;
+    
+    if (percent > 90) {
+      fill.style.background = 'linear-gradient(90deg, var(--warn), var(--err))';
+    } else if (percent > 70) {
+      fill.style.background = 'linear-gradient(90deg, var(--ok), var(--warn))';
+    } else {
+      fill.style.background = 'linear-gradient(90deg, var(--ok), #84cc16)';
+    }
+
+    const info = document.getElementById('context-window-info');
+    info.innerHTML = `
+      <strong>${data.token_count.toLocaleString()}</strong> / <strong>${data.context_window_size.toLocaleString()}</strong> tokens used
+      (${data.tokens_remaining.toLocaleString()} remaining)
+      <br>
+      <span class="muted">Model: ${data.model} | Encoding: ${data.encoding}</span>
+    `;
+  }
+
+  function renderTokenBreakdown(data) {
+    const container = document.getElementById('token-breakdown');
+    
+    if (!data.tokens || data.tokens.length === 0) {
+      container.innerHTML = '<div class="muted" style="text-align: center; padding: 40px;">No tokens to display</div>';
+      return;
+    }
+
+    // Show first 100 tokens in table, rest in summary
+    const displayTokens = data.tokens.slice(0, 100);
+    const remaining = data.tokens.length - 100;
+
+    let html = `
+      <table>
+        <thead>
+          <tr>
+            <th>Index</th>
+            <th>Token ID</th>
+            <th>Token String</th>
+            <th>Bytes</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    displayTokens.forEach(token => {
+      const tokenStr = escapeHtml(token.token_string);
+      html += `
+        <tr>
+          <td>${token.index}</td>
+          <td><code>${token.token_id}</code></td>
+          <td><code style="background: var(--glass); padding: 2px 6px; border-radius: 4px;">${tokenStr}</code></td>
+          <td>${token.byte_length}</td>
+        </tr>
+      `;
+    });
+
+    html += '</tbody></table>';
+
+    if (remaining > 0) {
+      html += `<div class="muted" style="margin-top: 12px; text-align: center;">... and ${remaining.toLocaleString()} more tokens</div>`;
+    }
+
+    container.innerHTML = html;
+  }
+
+  function renderTokenVisualization(data) {
+    const container = document.getElementById('token-visualization');
+    
+    if (!data.tokens || data.tokens.length === 0) {
+      container.innerHTML = '<div class="muted" style="text-align: center; padding: 40px;">No tokens to visualize</div>';
+      return;
+    }
+
+    // Create visual representation with color-coded tokens
+    let html = '';
+    const colors = ['#7c3aed', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6'];
+    
+    data.tokens.forEach((token, i) => {
+      const color = colors[i % colors.length];
+      const tokenStr = escapeHtml(token.token_string);
+      html += `<span style="background: ${color}20; color: ${color}; padding: 2px 4px; margin: 2px; border-radius: 4px; border: 1px solid ${color}40; display: inline-block;" title="ID: ${token.token_id}, Index: ${token.index}">${tokenStr}</span>`;
+    });
+
+    container.innerHTML = html || '<div class="muted">No visualization available</div>';
+  }
+
+  function loadTokenizerExample() {
+    const examples = [
+      "Hello! How are you today? This is a test of the tokenizer system.",
+      "The quick brown fox jumps over the lazy dog. This sentence contains every letter of the alphabet.",
+      "Tokenization is the process of breaking down text into smaller units called tokens. These tokens are then used by language models to understand and generate text.",
+      "In natural language processing, tokenization is a crucial step. It helps models understand context, manage memory, and process information efficiently.",
+    ];
+    const randomExample = examples[Math.floor(Math.random() * examples.length)];
+    document.getElementById('tokenizer-input').value = randomExample;
+  }
+
+  function copyTokens() {
+    if (!tokenizerState.currentResult) {
+      showToast('No tokens to copy', 'warning');
+      return;
+    }
+    const data = JSON.stringify(tokenizerState.currentResult, null, 2);
+    navigator.clipboard.writeText(data);
+    showToast('Tokens copied to clipboard', 'success');
+  }
+
+  function exportTokens() {
+    if (!tokenizerState.currentResult) {
+      showToast('No tokens to export', 'warning');
+      return;
+    }
+    const data = JSON.stringify(tokenizerState.currentResult, null, 2);
+    const blob = new Blob([data], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tokens-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Tokens exported', 'success');
+  }
+
+  // Utility
+  function escapeHtml(s) {
+    return s.replace(/[&<>"'`]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;'}[c]));
+  }
+
+  // Make state available globally for inline handlers
+  window.state = state;
+  window.renderFilters = renderFilters;
+  window.renderPresets = renderPresets;
 })();
 </script>
 </body>

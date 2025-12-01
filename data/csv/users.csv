@@ -1,0 +1,11 @@
+id,name,email,role,active,phone,address,created_at,updated_at,avatar_url,preferences
+1,Lucius Morningstar,lucius@example.com,admin,true,+1-555-0101,"123 Main St, New York, NY 10001",2024-01-15T10:30:00Z,2025-11-29T21:00:00Z,https://api.example.com/avatars/lucius.jpg,"{""theme"":""dark"",""notifications"":true}"
+2,Jane Doe,jane.doe@example.com,agent,true,+1-555-0102,"456 Oak Ave, Los Angeles, CA 90001",2024-02-20T14:15:00Z,2025-11-28T18:45:00Z,https://api.example.com/avatars/jane.jpg,"{""theme"":""light"",""notifications"":false}"
+3,John Smith,john.smith@example.com,agent,false,+1-555-0103,"789 Pine Rd, Chicago, IL 60601",2024-03-10T09:00:00Z,2025-11-25T12:20:00Z,https://api.example.com/avatars/john.jpg,"{""theme"":""dark"",""notifications"":true}"
+4,Mary Johnson,mary.j@example.com,agent,true,+1-555-0104,"321 Elm St, Houston, TX 77001",2024-04-05T11:45:00Z,2025-11-29T19:30:00Z,https://api.example.com/avatars/mary.jpg,"{""theme"":""light"",""notifications"":true}"
+5,Alan Turing,alan.t@example.com,admin,true,+1-555-0105,"654 Maple Dr, Phoenix, AZ 85001",2024-01-01T08:00:00Z,2025-11-29T20:15:00Z,https://api.example.com/avatars/alan.jpg,"{""theme"":""dark"",""notifications"":true}"
+6,Sarah Connor,sarah.c@example.com,agent,true,+1-555-0106,"987 Cedar Ln, Philadelphia, PA 19101",2024-05-12T16:20:00Z,2025-11-28T17:10:00Z,https://api.example.com/avatars/sarah.jpg,"{""theme"":""light"",""notifications"":false}"
+7,David Lee,david.l@example.com,agent,true,+1-555-0107,"147 Birch Way, San Antonio, TX 78201",2024-06-18T13:30:00Z,2025-11-27T15:45:00Z,https://api.example.com/avatars/david.jpg,"{""theme"":""dark"",""notifications"":true}"
+8,Emily Chen,emily.c@example.com,agent,false,+1-555-0108,"258 Spruce Ct, San Diego, CA 92101",2024-07-22T10:15:00Z,2025-11-26T14:00:00Z,https://api.example.com/avatars/emily.jpg,"{""theme"":""light"",""notifications"":true}"
+9,Michael Brown,michael.b@example.com,admin,true,+1-555-0109,"369 Willow St, Dallas, TX 75201",2024-08-30T09:45:00Z,2025-11-29T21:30:00Z,https://api.example.com/avatars/michael.jpg,"{""theme"":""dark"",""notifications"":true}"
+10,Lisa Wang,lisa.w@example.com,agent,true,+1-555-0110,"741 Ash Blvd, San Jose, CA 95101",2024-09-15T12:00:00Z,2025-11-29T18:20:00Z,https://api.example.com/avatars/lisa.jpg,"{""theme"":""light"",""notifications"":false}"
